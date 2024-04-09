@@ -6,29 +6,41 @@ import {
   Dimensions,
   View,
   Image,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Color } from "../GlobalStyles";
+import { Color, FontFamily } from "../GlobalStyles";
 import * as Svg from "react-native-svg";
 import { SearchComponent } from "../components/molecule/SearchComponent";
+import { SelectButton } from "../components/atom/SelectButton";
+import { DeSelectButton } from "../components/atom/DeSelectButton";
+import { BudgetComponent } from "../components/molecule/BudgetComponent";
+import { FoodType } from "../components/atom/FoodType";
 
 const HomeScreen = () => {
   return (
-    <SafeAreaView>
+    <ScrollView>
       <View style={styles.mainContainer}>
         <View style={styles.iconContainer}>
           <Image
-            source={require("../assets/images/restaurant.png")}
+            source={require("../assets/images/KnifenFork.png")}
             style={styles.icon}
           />
         </View>
         <Text style={styles.titleText}>Food Finder</Text>
         <Text style={styles.text}>What kind of food?</Text>
         <SearchComponent />
+        <FoodType />
         <Text style={styles.text}>How much to spend?</Text>
         <Text style={styles.subText}>$114.1k left</Text>
+
+        <BudgetComponent text={undefined} />
+        <View style={styles.buttonContainer}>
+        <SelectButton text='SEARCH' />
+        <DeSelectButton text='CANCEL'/>
+        </View>
       </View>
-    </SafeAreaView>
+    </ScrollView>
   );
 };
 
@@ -44,16 +56,16 @@ const styles = StyleSheet.create({
     backgroundColor: Color.blueGreen,
     borderWidth: 1,
     borderRadius: 50,
-    height: 80,
-    width: 80,
+    height: 56,
+    width: 56,
     justifyContent: "center",
     alignSelf: "center",
-    marginTop: 80,
+    marginTop: 64,
   },
   icon: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
+    width: 25,
+    height: 29,
+    //justifyContent: "center",
     alignSelf: "center",
   },
   titleText: {
@@ -62,6 +74,7 @@ const styles = StyleSheet.create({
     //justifyContent:'center',
     marginTop: 20,
     alignSelf: "center",
+    fontFamily:FontFamily.podkovaBold,
   },
   searchIcon: {
     width: 30,
@@ -69,14 +82,21 @@ const styles = StyleSheet.create({
   },
   text: {
     color: Color.blueGreen,
-    marginTop: 60,
+    marginTop: 20,
     fontSize: 20,
     alignSelf: "center",
+    fontFamily:FontFamily.podkovaRegular
   },
   subText: {
     color: Color.wHITE,
     alignSelf: "center",
+    fontSize: 14,
+    //fontFamily:FontFamily.podkovaRegular
   },
+  buttonContainer:{
+    flexDirection:'column',
+    gap:20,
+  }
 });
 
 export { HomeScreen };

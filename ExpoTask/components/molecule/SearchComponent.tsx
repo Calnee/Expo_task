@@ -15,7 +15,7 @@ const SearchComponent = () => {
     <View style={styles.searchView}>
       <TextInput
         style={styles.input}
-        placeholder="Enter food types or keyword"
+        placeholder="Enter food type or keyword"
         placeholderTextColor={Color.wHITE}
         //value={query}
         //onChangeText={(text) => setQuery(text)}
@@ -36,15 +36,17 @@ const styles = StyleSheet.create({
   searchView: {
     flexDirection: "row",
     marginTop: 20,
-    justifyContent:'center'
+    justifyContent:'center',
+    marginBottom:20
   },
   input: {
     // flex:1,
     width: "85%",
     alignSelf: "center",
     margin: 10,
+    padding:8,
     paddingLeft: 20,
-    height: "110%",
+   //height: "110%",
     borderWidth: 1,
     borderRadius: 20,
     borderColor: Color.colorGray_200,
