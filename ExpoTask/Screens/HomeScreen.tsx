@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,17 +7,61 @@ import {
   View,
   Image,
   ScrollView,
+  FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Color, FontFamily } from "../GlobalStyles";
-import * as Svg from "react-native-svg";
 import { SearchComponent } from "../components/molecule/SearchComponent";
 import { SelectButton } from "../components/atom/SelectButton";
 import { DeSelectButton } from "../components/atom/DeSelectButton";
-import { BudgetComponent } from "../components/molecule/BudgetComponent";
 import { FoodType } from "../components/atom/FoodType";
+import MultiSlider from "@ptomasroos/react-native-multi-slider";
+
+//foodType data
+export const feeds = [
+  {
+    id: "1",
+    foodType: "FASTFOOD",
+  },
+  {
+    id: "2",
+    foodType: "TERIYAKI",
+  },
+  {
+    id: "3",
+    foodType: "TACOS",
+  },
+  {
+    id: "6",
+    foodType: "ITALIAN",
+  },
+  {
+    id: "4",
+    foodType: "BURGER",
+  },
+  {
+    id: "5",
+    foodType: "BBQ",
+  },
+  {
+    id: "7",
+    foodType: "CURRY",
+  },
+];
+//Budget component data
+export const budget = {
+  id: "1",
+  amount: 114,
+};
 
 const HomeScreen = () => {
+  const [values, setValues] = useState([0, budget.amount]);
+
+  const multiSliderValuesChange = (values) => {
+    setValues(values);
+  };
+  const SeparatorComponent = () => <View style={styles.separator} />;
+
   return (
     <ScrollView>
       <View style={styles.mainContainer}>
@@ -28,16 +72,65 @@ const HomeScreen = () => {
           />
         </View>
         <Text style={styles.titleText}>Food Finder</Text>
-        <Text style={styles.text}>What kind of food?</Text>
+        <Text style={styles.textHome}>What kind of food?</Text>
         <SearchComponent />
-        <FoodType />
-        <Text style={styles.text}>How much to spend?</Text>
-        <Text style={styles.subText}>$114.1k left</Text>
 
-        <BudgetComponent />
+        {/* food Types */}
+        <FlatList
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          data={feeds}
+          renderItem={({ item }) => <FoodType foodType={item.foodType} />}
+          keyExtractor={(item) => item.id}
+          ItemSeparatorComponent={SeparatorComponent}
+          contentContainerStyle={styles.listContainer}
+        />
+
+        <Text style={styles.budgetText}>How much to spend?</Text>
+        <Text style={styles.subText}>${budget.amount} left</Text>
+
+        {/* BudgetComponent */}
+        <TouchableOpacity>
+          <View style={styles.budgetView}>
+            {/* <Text style={styles.text}>{text}</Text> */}
+
+            <View style={styles.sliderContainer}>
+              <Text style={styles.amountText}>
+                ${values[0]} - ${values[1]}
+              </Text>
+              <View style={styles.sliderStyle}>
+                <MultiSlider
+                  values={[values[0], values[1]]}
+                  //sliderLength={250}
+                  onValuesChange={multiSliderValuesChange}
+                  min={0}
+                  max={budget.amount}
+                  step={1}
+                  selectedStyle={{
+                    backgroundColor: Color.teal,
+                  }}
+                  unselectedStyle={{
+                    backgroundColor: Color.black,
+                  }}
+                  markerStyle={{
+                    backgroundColor: Color.neonBlue,
+                    height: 16,
+                    width: 16,
+                    marginTop: 8,
+                  }}
+                  // markerOffsetX={0}
+                  // markerOffsetY={0}
+                  trackStyle={{
+                    height: 8, // Adjust the height as per your preference
+                  }}
+                />
+              </View>
+            </View>
+          </View>
+        </TouchableOpacity>
         <View style={styles.buttonContainer}>
-        <SelectButton text='SEARCH' />
-        <DeSelectButton text='CANCEL'/>
+          <SelectButton text="SEARCH" />
+          <DeSelectButton text="CANCEL" />
         </View>
       </View>
     </ScrollView>
@@ -47,7 +140,6 @@ const HomeScreen = () => {
 const { width, height } = Dimensions.get("window");
 const styles = StyleSheet.create({
   mainContainer: {
-    // flex:1,
     width,
     height,
     backgroundColor: Color.bGNavy900,
@@ -65,27 +157,32 @@ const styles = StyleSheet.create({
   icon: {
     width: 25,
     height: 29,
-    //justifyContent: "center",
     alignSelf: "center",
   },
   titleText: {
     color: Color.wHITE,
     fontSize: 40,
-    //justifyContent:'center',
     marginTop: 20,
     alignSelf: "center",
-    fontFamily:FontFamily.podkovaBold,
+    fontFamily: FontFamily.podkovaBold,
   },
   searchIcon: {
     width: 30,
     height: 30,
   },
-  text: {
+  textHome: {
     color: Color.blueGreen,
     marginTop: 20,
     fontSize: 20,
     alignSelf: "center",
-    fontFamily:FontFamily.podkovaRegular
+    fontFamily: FontFamily.podkovaRegular,
+  },
+  budgetText: {
+    color: Color.blueGreen,
+    fontSize: 20,
+    alignSelf: "center",
+    fontFamily: FontFamily.podkovaRegular,
+    marginBottom:10
   },
   subText: {
     color: Color.wHITE,
@@ -93,10 +190,63 @@ const styles = StyleSheet.create({
     fontSize: 14,
     //fontFamily:FontFamily.podkovaRegular
   },
-  buttonContainer:{
-    flexDirection:'column',
-    gap:20,
-  }
+  buttonContainer: {
+    flexDirection: "column",
+    gap: 20,
+    marginBottom:70
+  },
+  //foodType styles
+  mainView: {
+    alignSelf: "center",
+    borderWidth: 1,
+    borderRadius: 20,
+    backgroundColor: Color.black,
+    borderColor: Color.colorGray_200,
+    width: "auto",
+    marginBottom: 10,
+    //paddingLeft:40,
+  },
+  text: {
+    color: Color.wHITE,
+    alignSelf: "center",
+    padding: 10,
+    fontSize: 16,
+    fontWeight: "600",
+    //marginTop:8
+  },
+  listContainer: {
+    marginLeft: 30,
+  },
+  separator: {
+    width: 10,
+    backgroundColor: "transparent",
+  },
+  //budget component style
+  budgetView: {
+     marginTop: 20,
+    alignSelf: "center",
+    borderWidth: 1,
+    borderRadius: 20,
+    backgroundColor: Color.gray200,
+    borderColor: Color.colorGray_200,
+    width: "80%",
+    height: 105,
+     marginBottom: 90,
+  },
+  sliderContainer: {
+    alignItems: "center",
+  },
+  sliderStyle: {
+    width: "100%",
+    height: 2,
+    alignItems: "center",
+  },
+  amountText: {
+    fontSize: 40,
+    marginTop: 5,
+    fontWeight: "400",
+    color: Color.wHITE,
+  },
 });
 
 export { HomeScreen };

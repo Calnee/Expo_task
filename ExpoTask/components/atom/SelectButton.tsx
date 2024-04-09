@@ -17,10 +17,9 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     borderWidth: 1,
     borderRadius: 20,
-    backgroundColor: Color.lightGreyGreen,
+    backgroundColor: Color.teal,
     borderColor: Color.blueGreen,
     width: "80%",
-    //height: "22%",
   },
   text: {
     color: Color.blueGreen,
