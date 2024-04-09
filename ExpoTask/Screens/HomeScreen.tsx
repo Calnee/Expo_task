@@ -34,7 +34,7 @@ const HomeScreen = () => {
         <Text style={styles.text}>How much to spend?</Text>
         <Text style={styles.subText}>$114.1k left</Text>
 
-        <BudgetComponent text={undefined} />
+        <BudgetComponent />
         <View style={styles.buttonContainer}>
         <SelectButton text='SEARCH' />
         <DeSelectButton text='CANCEL'/>
