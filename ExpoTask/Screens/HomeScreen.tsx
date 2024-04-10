@@ -73,7 +73,7 @@ export const budget = {
   amount: 114,
 };
 
-const HomeScreen = () => {
+const HomeScreen = ({navigation}) => {
   const [values, setValues] = useState([0, budget.amount]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredFoodTypes, setFilteredFoodTypes] = useState(feeds);
@@ -90,13 +90,19 @@ const HomeScreen = () => {
     setValues(values);
   };
 
+  const handleHotelListPress = () => {
+    navigation.navigate('HotelListScreen');
+    // navigation.navigate('Main');
+};
+
   const SeparatorComponent = () => <View style={styles.separator} />;
   const ITEM_WIDTH_PERCENTAGE = 0.3;
   const windowWidth = Dimensions.get("window").width;
   const ITEM_WIDTH = windowWidth * ITEM_WIDTH_PERCENTAGE;
 
   return (
-    <ScrollView>
+    <SafeAreaView>
+      <ScrollView>
       <View style={styles.parent}>
         <View style={styles.iconContainer}>
           <Image
@@ -165,11 +171,12 @@ const HomeScreen = () => {
           </View>
         </TouchableOpacity>
         <View style={styles.buttonContainer}>
-          <SelectButton text="SEARCH" />
-          <DeSelectButton text="CANCEL" />
+          <SelectButton text="SEARCH" onPress={handleHotelListPress}/>
+          <DeSelectButton text="CANCEL" onPress={undefined} />
         </View>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -179,6 +186,7 @@ const styles = StyleSheet.create({
     width,
     height,
     backgroundColor: Color.bGNavy900,
+    //marginTop:44
   },
   iconContainer: {
     backgroundColor: Color.blueGreen,
