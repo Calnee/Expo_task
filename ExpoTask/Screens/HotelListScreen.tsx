@@ -73,7 +73,7 @@ const HotelListScreen = ({navigation}) => {
   }
   return (
  
-    <ScrollView style={styles.main_container}>
+    <SafeAreaView style={styles.main_container}>
       <View style={styles.first_row}>
         <View>
           <TouchableOpacity onPress={handleHomePress}>
@@ -107,7 +107,7 @@ const HotelListScreen = ({navigation}) => {
           <Text style={styles.takeMeThereText}>TAKE ME THERE</Text>
         </TouchableOpacity>
       )}
-    </ScrollView>
+    </SafeAreaView>
 
   );
 };
