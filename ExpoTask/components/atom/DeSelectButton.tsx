@@ -2,9 +2,9 @@ import * as React from "react";
 import { Image, StyleSheet, View, TouchableOpacity, Text } from "react-native";
 import { Color } from "../../GlobalStyles";
 
-const DeSelectButton = ({text}) => {
+const DeSelectButton = ({text, onPress}) => {
   return (
-    <TouchableOpacity>
+    <TouchableOpacity onPress={onPress}>
       <View style={styles.mainView}>
         <Text style={styles.text}>{text}</Text>
       </View>

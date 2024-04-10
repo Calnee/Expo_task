@@ -66,6 +66,14 @@ export const feeds = [
     id: "12",
     foodType: "SALAD",
   },
+  // {
+  //   id:"13",
+  //   foodType:"APPAM AND KADALAKKARI OR EGG CURRY"
+  // },
+  // {
+  //   id:"14",
+  //   foodType:"APPAM AND KADALAKKARI OR EGG CURRY"
+  // }
 ];
 //Budget component data
 export const budget = {
@@ -91,7 +99,7 @@ const HomeScreen = () => {
   };
 
   const SeparatorComponent = () => <View style={styles.separator} />;
-  const ITEM_WIDTH_PERCENTAGE = 0.3;
+  const ITEM_WIDTH_PERCENTAGE = 0.5;
   const windowWidth = Dimensions.get("window").width;
   const ITEM_WIDTH = windowWidth * ITEM_WIDTH_PERCENTAGE;
 
@@ -116,13 +124,12 @@ const HomeScreen = () => {
           renderItem={({ item }) => <FoodType foodType={item.foodType} />}
           keyExtractor={(item) => item.id}
           ItemSeparatorComponent={SeparatorComponent}
+          scrollEventThrottle={16}
           contentContainerStyle={[
             styles.listContainer,
             filteredFoodTypes.length <= 2
               ? { width: Dimensions.get("window").width }
               : { width: ITEM_WIDTH * filteredFoodTypes.length },
-            // styles.listContainer,
-            // { width: filteredFoodTypes.length * 100 }
           ]}
         />
 
@@ -165,8 +172,8 @@ const HomeScreen = () => {
           </View>
         </TouchableOpacity>
         <View style={styles.buttonContainer}>
-          <SelectButton text="SEARCH" />
-          <DeSelectButton text="CANCEL" />
+          <SelectButton text="SEARCH" onPress={undefined} />
+          <DeSelectButton text="CANCEL" onPress={undefined} />
         </View>
       </View>
     </ScrollView>
