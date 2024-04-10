@@ -8,9 +8,9 @@ import {
   Image,
   TextInput,
 } from "react-native";
-import { Color } from "../../GlobalStyles";
+import { Border, Color, Padding } from "../../GlobalStyles";
 
-const SearchComponent = () => {
+const SearchComponent = ({ onSearch }) => {
   return (
     <View style={styles.searchView}>
       <TextInput
@@ -18,7 +18,7 @@ const SearchComponent = () => {
         placeholder="Enter food type or keyword"
         placeholderTextColor={Color.wHITE}
         //value={query}
-        //onChangeText={(text) => setQuery(text)}
+        onChangeText={(text) => onSearch(text)}
       />
       <TouchableOpacity>
         <Image
@@ -44,13 +44,14 @@ const styles = StyleSheet.create({
     width: "85%",
     alignSelf: "center",
     margin: 10,
-    padding:8,
-    paddingLeft: 20,
+    padding:Padding.p_5xs,
+    paddingLeft: Padding.p_xl,
    //height: "110%",
-    borderWidth: 1,
+    borderWidth: Border.br_12xs_5,
     borderRadius: 20,
     borderColor: Color.colorGray_200,
     backgroundColor: Color.gray200,
+    color:Color.wHITE,
     position: "absolute",
   },
   icon: {

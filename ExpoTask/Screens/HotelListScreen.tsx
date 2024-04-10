@@ -9,7 +9,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Color } from "../GlobalStyles";
 import * as Svg from "react-native-svg";
-import MapView, { Marker } from "react-native-maps";
+
 
 const HotelListScreen = () => {
   const [markers, setMarkers] = useState([]);
@@ -24,32 +24,7 @@ const HotelListScreen = () => {
   return (
     <SafeAreaView>
       <View style={styles.mainContainer}>
-        <Text style={styles.titleText}>Map</Text>
-        <View style={styles.mapView}>
-          <MapView
-            style={styles.mapStyle}
-            onPress={handleMapPress}
-            initialRegion={{
-              latitude: 20.5937,
-              longitude: 78.9629,
-              latitudeDelta: 2,
-              longitudeDelta: 2,
-            }}
-            showsUserLocation={true}
-          >
-            {tappedCoordinates.map((coordinate, index) => (
-              <Marker key={index} coordinate={coordinate} />
-            ))}
-          </MapView>
-        </View>
-        <Text style={styles.textColor}>Tapped coordinates:</Text>
-        <View style={styles.coordinateContainer}>
-          {tappedCoordinates.map((coordinate, index) => (
-            <Text key={index} style={styles.textColor}>
-              {`Lat: ${coordinate.latitude}, Long: ${coordinate.longitude}`}
-            </Text>
-          ))}
-        </View>
+  
       </View>
     </SafeAreaView>
   );
