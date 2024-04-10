@@ -101,7 +101,7 @@ const HomeScreen = ({navigation}) => {
   const ITEM_WIDTH = windowWidth * ITEM_WIDTH_PERCENTAGE;
 
   return (
-    <SafeAreaView>
+    
       <ScrollView>
       <View style={styles.parent}>
         <View style={styles.iconContainer}>
@@ -176,7 +176,7 @@ const HomeScreen = ({navigation}) => {
         </View>
       </View>
       </ScrollView>
-    </SafeAreaView>
+   
   );
 };
 

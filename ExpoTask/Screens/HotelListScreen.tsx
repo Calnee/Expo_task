@@ -72,7 +72,7 @@ const HotelListScreen = ({navigation}) => {
     return null;
   }
   return (
-    <SafeAreaView>
+  
     <ScrollView style={styles.main_container}>
       <View style={styles.first_row}>
         <View>
@@ -108,8 +108,7 @@ const HotelListScreen = ({navigation}) => {
         </TouchableOpacity>
       )}
     </ScrollView>
-    </SafeAreaView>
-  );
+ 
 };
 
 const { width, height } = Dimensions.get("window");
