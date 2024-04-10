@@ -66,14 +66,7 @@ export const feeds = [
     id: "12",
     foodType: "SALAD",
   },
-  // {
-  //   id:"13",
-  //   foodType:"APPAM AND KADALAKKARI OR EGG CURRY"
-  // },
-  // {
-  //   id:"14",
-  //   foodType:"APPAM AND KADALAKKARI OR EGG CURRY"
-  // }
+ 
 ];
 //Budget component data
 export const budget = {
