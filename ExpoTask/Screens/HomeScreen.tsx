@@ -106,7 +106,7 @@ const HomeScreen = () => {
         </View>
         <Text style={styles.titleText}>Food Finder</Text>
         <Text style={styles.textHome}>What kind of food?</Text>
-        <SearchComponent onSearch={handleSearch} />
+        <SearchComponent onSearch={handleSearch} onPress={undefined} />
 
         {/* food Types */}
         <FlatList
