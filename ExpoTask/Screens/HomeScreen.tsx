@@ -10,13 +10,12 @@ import {
   FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Color, FontFamily } from "../GlobalStyles";
+import { Border, Color, FontFamily, FontSize, Padding } from "../GlobalStyles";
 import { SearchComponent } from "../components/molecule/SearchComponent";
 import { SelectButton } from "../components/atom/SelectButton";
 import { DeSelectButton } from "../components/atom/DeSelectButton";
 import { FoodType } from "../components/atom/FoodType";
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
-
 //foodType data
 export const feeds = [
   {
@@ -32,10 +31,6 @@ export const feeds = [
     foodType: "TACOS",
   },
   {
-    id: "6",
-    foodType: "ITALIAN",
-  },
-  {
     id: "4",
     foodType: "BURGER",
   },
@@ -44,8 +39,32 @@ export const feeds = [
     foodType: "BBQ",
   },
   {
+    id: "6",
+    foodType: "ITALIAN",
+  },
+  {
     id: "7",
     foodType: "CURRY",
+  },
+  {
+    id: "8",
+    foodType: "CHINESE",
+  },
+  {
+    id: "9",
+    foodType: "NOODLES",
+  },
+  {
+    id: "10",
+    foodType: "PIZZA",
+  },
+  {
+    id: "11",
+    foodType: "PASTA",
+  },
+  {
+    id: "12",
+    foodType: "SALAD",
   },
 ];
 //Budget component data
@@ -56,15 +75,29 @@ export const budget = {
 
 const HomeScreen = () => {
   const [values, setValues] = useState([0, budget.amount]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredFoodTypes, setFilteredFoodTypes] = useState(feeds);
+
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    const filtered = feeds.filter((item) =>
+      item.foodType.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredFoodTypes(filtered);
+  };
 
   const multiSliderValuesChange = (values) => {
     setValues(values);
   };
+
   const SeparatorComponent = () => <View style={styles.separator} />;
+  const ITEM_WIDTH_PERCENTAGE = 0.3;
+  const windowWidth = Dimensions.get("window").width;
+  const ITEM_WIDTH = windowWidth * ITEM_WIDTH_PERCENTAGE;
 
   return (
     <ScrollView>
-      <View style={styles.mainContainer}>
+      <View style={styles.parent}>
         <View style={styles.iconContainer}>
           <Image
             source={require("../assets/images/KnifenFork.png")}
@@ -73,17 +106,24 @@ const HomeScreen = () => {
         </View>
         <Text style={styles.titleText}>Food Finder</Text>
         <Text style={styles.textHome}>What kind of food?</Text>
-        <SearchComponent />
+        <SearchComponent onSearch={handleSearch} />
 
         {/* food Types */}
         <FlatList
           horizontal={true}
           showsHorizontalScrollIndicator={false}
-          data={feeds}
+          data={filteredFoodTypes}
           renderItem={({ item }) => <FoodType foodType={item.foodType} />}
           keyExtractor={(item) => item.id}
           ItemSeparatorComponent={SeparatorComponent}
-          contentContainerStyle={styles.listContainer}
+          contentContainerStyle={[
+            styles.listContainer,
+            filteredFoodTypes.length <= 2
+              ? { width: Dimensions.get("window").width }
+              : { width: ITEM_WIDTH * filteredFoodTypes.length },
+            // styles.listContainer,
+            // { width: filteredFoodTypes.length * 100 }
+          ]}
         />
 
         <Text style={styles.budgetText}>How much to spend?</Text>
@@ -91,40 +131,36 @@ const HomeScreen = () => {
 
         {/* BudgetComponent */}
         <TouchableOpacity>
-          <View style={styles.budgetView}>
-            {/* <Text style={styles.text}>{text}</Text> */}
-
-            <View style={styles.sliderContainer}>
-              <Text style={styles.amountText}>
-                ${values[0]} - ${values[1]}
-              </Text>
-              <View style={styles.sliderStyle}>
-                <MultiSlider
-                  values={[values[0], values[1]]}
-                  //sliderLength={250}
-                  onValuesChange={multiSliderValuesChange}
-                  min={0}
-                  max={budget.amount}
-                  step={1}
-                  selectedStyle={{
-                    backgroundColor: Color.teal,
-                  }}
-                  unselectedStyle={{
-                    backgroundColor: Color.black,
-                  }}
-                  markerStyle={{
-                    backgroundColor: Color.neonBlue,
-                    height: 16,
-                    width: 16,
-                    marginTop: 8,
-                  }}
-                  // markerOffsetX={0}
-                  // markerOffsetY={0}
-                  trackStyle={{
-                    height: 8, // Adjust the height as per your preference
-                  }}
-                />
-              </View>
+          <View style={styles.budgetWrapper}>
+            <Text style={styles.amountText}>
+              ${values[0]} - ${values[1]}
+            </Text>
+            <View style={styles.sliderStyle}>
+              <MultiSlider
+                values={[values[0], values[1]]}
+                //sliderLength={250}
+                onValuesChange={multiSliderValuesChange}
+                min={0}
+                max={budget.amount}
+                step={1}
+                selectedStyle={{
+                  backgroundColor: Color.teal,
+                }}
+                unselectedStyle={{
+                  backgroundColor: Color.black,
+                }}
+                markerStyle={{
+                  backgroundColor: Color.neonBlue,
+                  height: 16,
+                  width: 16,
+                  marginTop: 8,
+                }}
+                // markerOffsetX={0}
+                // markerOffsetY={0}
+                trackStyle={{
+                  height: 8, // Adjust the height as per your preference
+                }}
+              />
             </View>
           </View>
         </TouchableOpacity>
@@ -139,14 +175,14 @@ const HomeScreen = () => {
 
 const { width, height } = Dimensions.get("window");
 const styles = StyleSheet.create({
-  mainContainer: {
+  parent: {
     width,
     height,
     backgroundColor: Color.bGNavy900,
   },
   iconContainer: {
     backgroundColor: Color.blueGreen,
-    borderWidth: 1,
+    borderWidth: Border.br_12xs_5,
     borderRadius: 50,
     height: 56,
     width: 56,
@@ -173,32 +209,32 @@ const styles = StyleSheet.create({
   textHome: {
     color: Color.blueGreen,
     marginTop: 20,
-    fontSize: 20,
+    fontSize: FontSize.size_xl,
     alignSelf: "center",
-    fontFamily: FontFamily.podkovaRegular,
+    fontFamily: FontFamily.podkovaSemiBold,
   },
   budgetText: {
     color: Color.blueGreen,
     fontSize: 20,
     alignSelf: "center",
     fontFamily: FontFamily.podkovaRegular,
-    marginBottom:10
+    marginBottom: 10,
   },
   subText: {
     color: Color.wHITE,
     alignSelf: "center",
-    fontSize: 14,
-    //fontFamily:FontFamily.podkovaRegular
+    fontSize: FontSize.size_smi,
+    fontFamily: FontFamily.sourceSansPro,
   },
   buttonContainer: {
     flexDirection: "column",
     gap: 20,
-    marginBottom:70
+    marginBottom: 70,
   },
   //foodType styles
   mainView: {
     alignSelf: "center",
-    borderWidth: 1,
+    borderWidth: Border.br_12xs_5,
     borderRadius: 20,
     backgroundColor: Color.black,
     borderColor: Color.colorGray_200,
@@ -209,32 +245,31 @@ const styles = StyleSheet.create({
   text: {
     color: Color.wHITE,
     alignSelf: "center",
-    padding: 10,
-    fontSize: 16,
+    padding: Padding.p_3xs,
+    fontSize: FontSize.size_base,
     fontWeight: "600",
     //marginTop:8
   },
   listContainer: {
     marginLeft: 30,
+    width: "auto",
   },
   separator: {
     width: 10,
     backgroundColor: "transparent",
   },
   //budget component style
-  budgetView: {
-     marginTop: 20,
+  budgetWrapper: {
+    marginTop: 20,
     alignSelf: "center",
-    borderWidth: 1,
+    alignItems: "center",
+    borderWidth: Border.br_12xs_5,
     borderRadius: 20,
     backgroundColor: Color.gray200,
     borderColor: Color.colorGray_200,
     width: "80%",
     height: 105,
-     marginBottom: 90,
-  },
-  sliderContainer: {
-    alignItems: "center",
+    marginBottom: 90,
   },
   sliderStyle: {
     width: "100%",

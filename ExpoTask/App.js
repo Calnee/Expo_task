@@ -13,12 +13,12 @@ const Stack = createStackNavigator();
 const fetchFonts = async () => {
   try {
       await Font.loadAsync({
-         // 'Source Sans Pro': require('./assets/fonts/SourceSans3-Regular.ttf'),
-         // 'Source Sans Pro Bold': require('./assets/fonts/SourceSans3-Bold.ttf'),
-          'Podkova-Bold': require('./assets/fonts/PodkovaBold-XL2Z.ttf'),
-         // 'Podkova-SemiBold': require('./assets/fonts/Podkova-SemiBold.ttf'),
-         // 'Podkova-Medium':require('./assets/fonts/Podkova-Medium.ttf'),
-          'Podkova-Regular':require('./assets/fonts/Podkova-LqwE.ttf')
+          'Source Sans Pro': require('./assets/fonts/SourceSans3-Regular.ttf'),
+          'Source Sans Pro Bold': require('./assets/fonts/SourceSans3-Bold.ttf'),
+          'Podkova-Bold': require('./assets/fonts/Podkova-Bold.ttf'),
+          'Podkova-SemiBold': require('./assets/fonts/Podkova-SemiBold.ttf'),
+          'Podkova-Medium':require('./assets/fonts/Podkova-Medium.ttf'),
+          'Podkova-Regular':require('./assets/fonts/Podkova-Regular.ttf')
       });
   } catch(error) {
       console.error(error);

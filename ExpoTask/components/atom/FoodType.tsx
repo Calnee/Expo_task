@@ -7,68 +7,8 @@ import {
   Text,
   FlatList,
 } from "react-native";
-import { Color } from "../../GlobalStyles";
+import { Border, Color, FontSize, Padding } from "../../GlobalStyles";
 import { useState } from "react";
-
-// export const feeds = [
-//   {
-//     id: "1",
-//     foodType: "FASTFOOD",
-//   },
-//   {
-//     id: "2",
-//     foodType: "TERIYAKI",
-//   },
-//   {
-//     id: "3",
-//     foodType: "TACOS",
-//   },
-//   {
-//     id: "6",
-//     foodType: "ITALIAN",
-//   },
-//   {
-//     id: "4",
-//     foodType: "BURGER",
-//   },
-//   {
-//     id: "5",
-//     foodType: "BBQ",
-//   },
-//   {
-//     id: "7",
-//     foodType: "CURRY",
-//   },
-// ];
-
-// type ItemProps = {
-//   foodType: string;
-// };
-
-// const Item = ({ foodType }: ItemProps) => {
-//   const [selected, setSelected] = useState(false);
-
-//   const handlePress = () => {
-//     setSelected(!selected);
-//   };
-
-//   return (
-//     <TouchableOpacity onPress={handlePress}>
-//       <View
-//         style={[
-//           styles.mainView,
-//           { backgroundColor: selected ? Color.blueGreen : Color.black },
-//         ]}
-//       >
-//         <Text
-//           style={[styles.text, { color: selected ? Color.black : Color.wHITE }]}
-//         >
-//           {/* {foodType} */}
-//         </Text>
-//       </View>
-//     </TouchableOpacity>
-//   );
-// };
 
 type foodType = {
   foodType: string;
@@ -101,7 +41,7 @@ const FoodType = ({ foodType, onPress }: foodType) => {
 const styles = StyleSheet.create({
   mainView: {
     alignSelf: "center",
-    borderWidth: 1,
+    borderWidth: Border.br_12xs_5,
     borderRadius: 20,
     backgroundColor: Color.black,
     borderColor: Color.colorGray_200,
@@ -111,13 +51,14 @@ const styles = StyleSheet.create({
   text: {
     color: Color.wHITE,
     alignSelf: "center",
-    padding: 10,
-    fontSize: 16,
+    padding: Padding.p_3xs,
+    fontSize: FontSize.size_base,
     fontWeight: "600",
     //marginTop:8
   },
   listContainer: {
-    marginLeft: 19,
+    marginLeft: 20,
+    marginRight: 20,
   },
   separator: {
     width: 10,

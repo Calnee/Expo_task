@@ -13,9 +13,9 @@ export const Color = {
     neonBlue: "#2ffee0",
 };
 export const FontFamily = {
-   // sourceSansPro: "Source Sans Pro",
+    sourceSansPro: "Source Sans Pro",
     podkovaBold: "Podkova-Bold",
-   // podkovaSemiBold: "Podkova-SemiBold",
+    podkovaSemiBold: "Podkova-SemiBold",
     podkovaRegular: "Podkova-Regular",
 };
 export const FontSize = {
