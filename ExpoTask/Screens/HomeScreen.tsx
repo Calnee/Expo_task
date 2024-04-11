@@ -77,6 +77,7 @@ const HomeScreen = ({navigation}) => {
   const [values, setValues] = useState([0, budget.amount]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredFoodTypes, setFilteredFoodTypes] = useState(feeds);
+  const defaultSelectedFoodType = "FASTFOOD";
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -92,7 +93,6 @@ const HomeScreen = ({navigation}) => {
 
   const handleHotelListPress = () => {
     navigation.navigate('HotelListScreen');
-    // navigation.navigate('Main');
 };
 
   const SeparatorComponent = () => <View style={styles.separator} />;
@@ -119,7 +119,7 @@ const HomeScreen = ({navigation}) => {
           horizontal={true}
           showsHorizontalScrollIndicator={false}
           data={filteredFoodTypes}
-          renderItem={({ item }) => <FoodType foodType={item.foodType} />}
+          renderItem={({ item }) => <FoodType foodType={item.foodType} defaultSelected={defaultSelectedFoodType === item.foodType}   />}
           keyExtractor={(item) => item.id}
           ItemSeparatorComponent={SeparatorComponent}
           contentContainerStyle={[
