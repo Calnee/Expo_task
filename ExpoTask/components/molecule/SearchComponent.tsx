@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,22 +10,60 @@ import {
 } from "react-native";
 import { Border, Color, Padding } from "../../GlobalStyles";
 
-const SearchComponent = ({ onSearch, onPress }) => {
+type Props = {
+  editable?: boolean;
+  value?: string;
+  setter?: (value: string) => void;
+  onSearch?: (value: string) => void;
+  onPress?: () => void;
+};
+
+const SearchComponent = ({ onSearch, onPress, ...props }: Props) => {
+  const [isFocused, setIsFocused] = useState(false);
+
+  const onChangeText = (value: string) => {
+    if (props.setter) {
+      props.setter(value);
+    }
+    if (onSearch) {
+      onSearch(value);
+    }
+  };
+
+  const clearText = () => {
+    if (props.setter) {
+      props.setter("");
+    }
+  };
+
   return (
     <TouchableOpacity onPress={onPress}>
       <View style={styles.searchView}>
         <TextInput
+          editable={props.editable}
           style={styles.input}
           placeholder="Enter food type or keyword"
           placeholderTextColor={Color.wHITE}
-          //value={query}
-          onChangeText={(text) => onSearch(text)}
+          value={props.value}
+          //onChangeText={(text) => onSearch(text)}
+          onChangeText={onChangeText}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
         />
 
-        <Image
-          source={require("../../assets/images/searchIcon.png")}
-          style={styles.icon}
-        />
+        {props.value ? (
+          <TouchableOpacity style={styles.icon} onPress={clearText}>
+           <Image
+            source={require("../../assets/images/close.png")}
+            style={styles.icon}
+          />
+          </TouchableOpacity>
+        ) : (
+          <Image
+            source={require("../../assets/images/searchIcon.png")}
+            style={styles.icon}
+          />
+        )}
       </View>
     </TouchableOpacity>
   );

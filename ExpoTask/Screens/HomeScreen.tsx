@@ -164,7 +164,7 @@ const HomeScreen = ({navigation}) => {
                 // markerOffsetX={0}
                 // markerOffsetY={0}
                 trackStyle={{
-                  height: 8, // Adjust the height as per your preference
+                  height: 8,
                 }}
               />
             </View>
