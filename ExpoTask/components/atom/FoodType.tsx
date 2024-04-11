@@ -40,11 +40,11 @@ const FoodType = ({ foodType,defaultSelected, onPress }: foodType) => {
       <View
         style={[
           styles.mainView,
-          { backgroundColor: selected || defaultSelected? Color.blueGreen : Color.black },
+          { backgroundColor: selected ? Color.blueGreen : Color.black },
         ]}
       >
         <Text
-          style={[styles.text, { color: selected || defaultSelected ? Color.black : Color.wHITE }]}
+          style={[styles.text, { color: selected ? Color.black : Color.wHITE }]}
         >
           {foodType}
         </Text>

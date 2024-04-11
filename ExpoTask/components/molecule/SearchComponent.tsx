@@ -49,6 +49,9 @@ const SearchComponent = ({
     if (setter) {
       setter(""); // Also clear the parent component's state if setter is provided
     }
+    if (onSearch) {
+      onSearch(""); // Pass an empty string to trigger the resetting of search results
+    }
  };
 
   return (
