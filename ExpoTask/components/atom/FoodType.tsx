@@ -9,14 +9,15 @@ import {
 } from "react-native";
 import { Border, Color, FontSize, Padding } from "../../GlobalStyles";
 import { useState } from "react";
-
+ 
 type foodType = {
   foodType: string;
+  defaultSelected?: boolean; // changed
   onPress?: () => void;
 };
-const FoodType = ({ foodType, onPress }: foodType) => {
+const FoodType = ({ foodType,defaultSelected, onPress }: foodType) => {
   const [selected, setSelected] = useState(false);
-
+ 
   const handlePress = () => {
     setSelected(!selected);
   };
@@ -25,11 +26,11 @@ const FoodType = ({ foodType, onPress }: foodType) => {
       <View
         style={[
           styles.mainView,
-          { backgroundColor: selected ? Color.blueGreen : Color.black },
+          { backgroundColor: selected || defaultSelected? Color.blueGreen : Color.black },
         ]}
       >
         <Text
-          style={[styles.text, { color: selected ? Color.black : Color.wHITE }]}
+          style={[styles.text, { color: selected || defaultSelected ? Color.black : Color.wHITE }]}
         >
           {foodType}
         </Text>
@@ -37,7 +38,7 @@ const FoodType = ({ foodType, onPress }: foodType) => {
     </TouchableOpacity>
   );
 };
-
+ 
 const styles = StyleSheet.create({
   mainView: {
     alignSelf: "center",
@@ -65,5 +66,5 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
 });
-
+ 
 export { FoodType };

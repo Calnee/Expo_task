@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+// import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -16,6 +16,7 @@ import { SelectButton } from "../components/atom/SelectButton";
 import { DeSelectButton } from "../components/atom/DeSelectButton";
 import { FoodType } from "../components/atom/FoodType";
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
+import { useState } from "react";
 //foodType data
 export const feeds = [
   {
@@ -73,10 +74,12 @@ export const budget = {
   amount: 114,
 };
 
-const HomeScreen = ({navigation}) => {
+const HomeScreen = ({ navigation }) => {
   const [values, setValues] = useState([0, budget.amount]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredFoodTypes, setFilteredFoodTypes] = useState(feeds);
+  const defaultSelectedFoodType = "FASTFOOD";
+  const [inputChanged, setInputChanged] = useState(false);
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -91,9 +94,8 @@ const HomeScreen = ({navigation}) => {
   };
 
   const handleHotelListPress = () => {
-    navigation.navigate('HotelListScreen');
-    // navigation.navigate('Main');
-};
+    navigation.navigate("HotelListScreen");
+  };
 
   const SeparatorComponent = () => <View style={styles.separator} />;
   const ITEM_WIDTH_PERCENTAGE = 0.3;
@@ -101,8 +103,7 @@ const HomeScreen = ({navigation}) => {
   const ITEM_WIDTH = windowWidth * ITEM_WIDTH_PERCENTAGE;
 
   return (
-    
-      <ScrollView>
+    <ScrollView>
       <View style={styles.parent}>
         <View style={styles.iconContainer}>
           <Image
@@ -112,14 +113,27 @@ const HomeScreen = ({navigation}) => {
         </View>
         <Text style={styles.titleText}>Food Finder</Text>
         <Text style={styles.textHome}>What kind of food?</Text>
-        <SearchComponent onSearch={handleSearch} onPress={undefined} />
+        <SearchComponent
+          onSearch={handleSearch}
+          hidden={false}
+          value={searchQuery}
+          setter={(val) => {
+            setInputChanged(true);
+            setSearchQuery(val);
+          }}
+        />
 
         {/* food Types */}
         <FlatList
           horizontal={true}
           showsHorizontalScrollIndicator={false}
           data={filteredFoodTypes}
-          renderItem={({ item }) => <FoodType foodType={item.foodType} />}
+          renderItem={({ item }) => (
+            <FoodType
+              foodType={item.foodType}
+              defaultSelected={defaultSelectedFoodType === item.foodType}
+            />
+          )}
           keyExtractor={(item) => item.id}
           ItemSeparatorComponent={SeparatorComponent}
           contentContainerStyle={[
@@ -164,19 +178,18 @@ const HomeScreen = ({navigation}) => {
                 // markerOffsetX={0}
                 // markerOffsetY={0}
                 trackStyle={{
-                  height: 8,
+                  height: 8, // Adjust the height as per your preference
                 }}
               />
             </View>
           </View>
         </TouchableOpacity>
         <View style={styles.buttonContainer}>
-          <SelectButton text="SEARCH" onPress={handleHotelListPress}/>
+          <SelectButton text="SEARCH" onPress={handleHotelListPress} />
           <DeSelectButton text="CANCEL" onPress={undefined} />
         </View>
       </View>
-      </ScrollView>
-   
+    </ScrollView>
   );
 };
 
