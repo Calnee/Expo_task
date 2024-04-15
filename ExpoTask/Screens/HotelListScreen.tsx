@@ -8,13 +8,14 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { Border, Color, FontFamily, Padding } from "../GlobalStyles";
+import { Border, Color, FontFamily } from "../GlobalStyles";
 import * as Font from "expo-font";
 import { RestaurantView } from "../components/atom/RestaurantComponent";
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 
-import * as Location from 'expo-location'; // Import Location module from Expo
+import * as Location from 'expo-location';
+
 const HotelListScreen = ({ navigation, route }) => {
 
   const [fontLoaded, setFontLoaded] = useState(false);
@@ -31,19 +32,7 @@ const HotelListScreen = ({ navigation, route }) => {
   };
 
   useEffect(() => {
-    const term = "restaurants";
-    const latitude = 41.4899827;
-    const longitude = -71.3137707;
-    const limit = 10;
-    const sort_by = "best_match";
-
-    const headers = {
-      Authorization:
-        "Bearer o7Hy7vuQYgzCO6VxjqImrn6A3XiCw7HfSv9KbofZBv2BzIJsNV1wp-l-OXpoibDkbyjPpq2pRx6L7NWdZG3eXWtzkC2i2ZgSrFGXCkO2bElErwdZ_1vikzLZav4XZnYx",
-      Accept: "application/json",
-    };
-
-     // Function to fetch user's current location
+    // Function to fetch user's current location
     const fetchUserLocation = async () => {
       try {
         // Request permission to access location
@@ -59,102 +48,110 @@ const HotelListScreen = ({ navigation, route }) => {
         console.error('Error fetching user location:', error);
       }
     };
-    
-            // Fetch user's current location if not already available
-        if (!userLocation) {
-          await fetchUserLocation();
-        }
-    
+
+    // Fetch user's current location if not already available
+    if (!userLocation) {
+      fetchUserLocation();
+    }
+
     async function fetchData() {
       try {
-        let priceRange;
-        if (minValue >= 0 && maxValue <= 10) {
-          priceRange = "1";
-        } else if (minValue >= 0 && maxValue <= 30) {
-          priceRange = "1,2";
-        } else if (minValue >= 0 && maxValue <= 100) {
-          priceRange = "1,2,3";
-        } else if (minValue >= 0 && maxValue > 100) {
-          priceRange = "1,2,3,4";
-        } else if (minValue > 10 && maxValue <= 30) {
-          priceRange = "2";
-        } else if (minValue > 10 && maxValue <= 100) {
-          priceRange = "2,3";
-        } else if (minValue > 10 && maxValue > 100) {
-          priceRange = "2,3,4";
-        } else if (minValue > 30 && maxValue <= 100) {
-          priceRange = "3";
-        } else if (minValue > 30 && maxValue > 100) {
-          priceRange = "3,4";
-        } else if (minValue > 100) {
-          priceRange = "4";
-        } else {
-          priceRange = "Invalid range";
-        }
-        
-                // Proceed with fetching restaurant data if user's location is available
+        // Proceed with fetching restaurant data if user's location is available
         if (userLocation) {
-          console.log('userlocation',userLocation)
-        const response = await axios.get(
-          `https://api.yelp.com/v3/businesses/search?`,
-          {
-            headers: headers,
-            params: {
-              term: term,
-              latitude: latitude,
-              longitude: longitude,
-              categories: selectedFood,
-              price: priceRange,
-              limit: limit,
-              sort_by: sort_by,
-            },
+          const term = "restaurants";
+          const latitude = userLocation.latitude;
+          const longitude = userLocation.longitude;
+          const limit = 10;
+          const sort_by = "best_match";
+          const headers = {
+            Authorization:
+              "Bearer o7Hy7vuQYgzCO6VxjqImrn6A3XiCw7HfSv9KbofZBv2BzIJsNV1wp-l-OXpoibDkbyjPpq2pRx6L7NWdZG3eXWtzkC2i2ZgSrFGXCkO2bElErwdZ_1vikzLZav4XZnYx",
+            Accept: "application/json",
+          };
+
+          let priceRange;
+          if (minValue >= 0 && maxValue <= 10) {
+            priceRange = "1";
+          } else if (minValue >= 0 && maxValue <= 30) {
+            priceRange = "1,2";
+          } else if (minValue >= 0 && maxValue <= 100) {
+            priceRange = "1,2,3";
+          } else if (minValue >= 0 && maxValue > 100) {
+            priceRange = "1,2,3,4";
+          } else if (minValue > 10 && maxValue <= 30) {
+            priceRange = "2";
+          } else if (minValue > 10 && maxValue <= 100) {
+            priceRange = "2,3";
+          } else if (minValue > 10 && maxValue > 100) {
+            priceRange = "2,3,4";
+          } else if (minValue > 30 && maxValue <= 100) {
+            priceRange = "3";
+          } else if (minValue > 30 && maxValue > 100) {
+            priceRange = "3,4";
+          } else if (minValue > 100) {
+            priceRange = "4";
+          } else {
+            priceRange = "Invalid range";
           }
-          });
 
-        // console.log('response:',response);
+          const response = await axios.get(
+            `https://api.yelp.com/v3/businesses/search?`,
+            {
+              headers: headers,
+              params: {
+                term: term,
+                latitude: latitude,
+                longitude: longitude,
+                categories: selectedFood,
+                price: priceRange,
+                limit: limit,
+                sort_by: sort_by,
+              },
+            }
+          );
 
-        const restaurantData = response.data.businesses.map((business) => ({
-          id: business.id,
-          restaurantName: business.name,
-          imageUri: { uri: business.image_url },
-          address: business.location.address1,
-        }));
+          const restaurantData = response.data.businesses.map((business) => ({
+            id: business.id,
+            restaurantName: business.name,
+            imageUri: { uri: business.image_url },
+            address: business.location.address1,
+          }));
 
-       // console.log(restaurantData);
-        setRestaurants(restaurantData);
-        setLoading(false);
+          setRestaurants(restaurantData);
+          setLoading(false);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
         setLoading(false);
       }
     }
 
+    //load fonts
     async function loadFonts() {
       await Font.loadAsync({
         Podkova: require("../assets/fonts/Podkova-Regular.ttf"),
       });
       setFontLoaded(true);
     };
- 
+
     fetchData(); // Fetch restaurant data
     loadFonts(); // Load fonts
- 
-  }, [userLocation]); // Fetch data whenever userLocation changes
- 
+
+  }, [userLocation, minValue, maxValue, selectedFood]);
 
   const handleSelectRestaurant = (restaurantId) => {
     setSelectedRestaurant(restaurantId);
   };
- 
+
   const handleTakeMeThere = () => {
     console.log("Take me there button pressed");
   };
- 
+
   if (!fontLoaded) {
     return null;
   }
-  return (
 
+  return (
     <ScrollView style={styles.main_container}>
       <View style={styles.first_row}>
         <View>
@@ -189,31 +186,23 @@ const HotelListScreen = ({ navigation, route }) => {
           <Text style={styles.takeMeThereText}>TAKE ME THERE</Text>
         </TouchableOpacity>
       )}
-
     </ScrollView>
   );
 };
- 
-const { width, height } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
   main_container: {
-    width: width,
-    height: height,
+    flex: 1,
     backgroundColor: Color.bGNavy900,
-  },
-  main_heading: {
-    color: Color.wHITE,
-    fontSize: 32,
-    marginLeft: 180,
-    fontFamily: FontFamily.podkovaSemiBold,
-    marginBottom: 10,
   },
   first_row: {
     flexDirection: "row",
     marginTop: 10,
+    paddingHorizontal: 20,
   },
   second_row: {
-    paddingHorizontal: 30,
+    paddingHorizontal: 20,
+    marginTop: 20,
   },
   back_image: {
     width: 32,
@@ -237,6 +226,13 @@ const styles = StyleSheet.create({
     color: Color.neonBlue,
     fontSize: 16,
   },
+  main_heading: {
+    color: Color.wHITE,
+    fontSize: 32,
+    marginLeft: 180,
+    fontFamily: FontFamily.podkovaSemiBold,
+    marginBottom: 10,
+  },
 });
- 
+
 export { HotelListScreen };
