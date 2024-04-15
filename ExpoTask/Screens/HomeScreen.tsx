@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -16,6 +15,7 @@ import { SelectButton } from "../components/atom/SelectButton";
 import { DeSelectButton } from "../components/atom/DeSelectButton";
 import { FoodType } from "../components/atom/FoodType";
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
+import { useState } from "react";
 //foodType data
 export const feeds = [
   {
@@ -44,7 +44,7 @@ export const feeds = [
   },
   {
     id: "7",
-    foodType: "CURRY",
+    foodType: "THAI",
   },
   {
     id: "8",
@@ -52,7 +52,7 @@ export const feeds = [
   },
   {
     id: "9",
-    foodType: "NOODLES",
+    foodType: "CAKE",
   },
   {
     id: "10",
@@ -64,7 +64,7 @@ export const feeds = [
   },
   {
     id: "12",
-    foodType: "SALAD",
+    foodType: "ARABIAN",
   },
 ];
 //Budget component data
@@ -73,11 +73,14 @@ export const budget = {
   amount: 114,
 };
 
-const HomeScreen = ({navigation}) => {
+const HomeScreen = ({ navigation }) => {
   const [values, setValues] = useState([0, budget.amount]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredFoodTypes, setFilteredFoodTypes] = useState(feeds);
   const defaultSelectedFoodType = "FASTFOOD";
+  const [selectedFood, setSelectedFood] = useState(defaultSelectedFoodType);
+
+  const [inputChanged, setInputChanged] = useState(false);
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -91,9 +94,23 @@ const HomeScreen = ({navigation}) => {
     setValues(values);
   };
 
+  const handleFoodTypePress = (selectedFood) => {
+    setSelectedFood(selectedFood);
+  };
+
   const handleHotelListPress = () => {
-    navigation.navigate('HotelListScreen');
-};
+    const minValue = values[0]; // Assign values here
+    const maxValue = values[1];
+    const foodType = selectedFood.toLowerCase();
+    console.log("Food type:", foodType);
+    navigation.navigate("HotelListScreen", {
+      minValue: values[0],
+      maxValue: values[1],
+      foodType: selectedFood.toLowerCase(),
+    });
+    console.log("minValue:", minValue);
+    console.log("maxValue:", maxValue);
+  };
 
   const SeparatorComponent = () => <View style={styles.separator} />;
   const ITEM_WIDTH_PERCENTAGE = 0.3;
@@ -101,8 +118,7 @@ const HomeScreen = ({navigation}) => {
   const ITEM_WIDTH = windowWidth * ITEM_WIDTH_PERCENTAGE;
 
   return (
-    
-      <ScrollView>
+    <ScrollView>
       <View style={styles.parent}>
         <View style={styles.iconContainer}>
           <Image
@@ -112,14 +128,28 @@ const HomeScreen = ({navigation}) => {
         </View>
         <Text style={styles.titleText}>Food Finder</Text>
         <Text style={styles.textHome}>What kind of food?</Text>
-        <SearchComponent onSearch={handleSearch} onPress={undefined} />
+        <SearchComponent
+          onSearch={handleSearch}
+          hidden={false}
+          value={searchQuery}
+          setter={(val) => {
+            setInputChanged(true);
+            setSearchQuery(val);
+          }}
+        />
 
         {/* food Types */}
         <FlatList
           horizontal={true}
           showsHorizontalScrollIndicator={false}
           data={filteredFoodTypes}
-          renderItem={({ item }) => <FoodType foodType={item.foodType} defaultSelected={defaultSelectedFoodType === item.foodType}   />}
+          renderItem={({ item }) => (
+            <FoodType
+              foodType={item.foodType}
+              defaultSelected={defaultSelectedFoodType === item.foodType}
+              onPress={handleFoodTypePress}
+            />
+          )}
           keyExtractor={(item) => item.id}
           ItemSeparatorComponent={SeparatorComponent}
           contentContainerStyle={[
@@ -171,12 +201,11 @@ const HomeScreen = ({navigation}) => {
           </View>
         </TouchableOpacity>
         <View style={styles.buttonContainer}>
-          <SelectButton text="SEARCH" onPress={handleHotelListPress}/>
+          <SelectButton text="SEARCH" onPress={handleHotelListPress} />
           <DeSelectButton text="CANCEL" onPress={undefined} />
         </View>
       </View>
-      </ScrollView>
-   
+    </ScrollView>
   );
 };
 

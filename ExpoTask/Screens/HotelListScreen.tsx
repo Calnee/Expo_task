@@ -13,21 +13,37 @@ import * as Font from "expo-font";
 import { RestaurantView } from "../components/atom/RestaurantComponent";
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
+
 import * as Location from 'expo-location'; // Import Location module from Expo
- 
-const HotelListScreen = ({navigation}) => {
+const HotelListScreen = ({ navigation, route }) => {
+
   const [fontLoaded, setFontLoaded] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [restaurants, setRestaurants] = useState([]);
+
   const [userLocation, setUserLocation] = useState(null); // State to store user's current location
- 
+  const { minValue, maxValue, selectedFood } = route.params;
+
   const handleHomePress = () => {
-    navigation.navigate('HomeScreen');
+    navigation.navigate("HomeScreen");
+    // navigation.navigate('Main');
   };
- 
+
   useEffect(() => {
-    // Function to fetch user's current location
+    const term = "restaurants";
+    const latitude = 41.4899827;
+    const longitude = -71.3137707;
+    const limit = 10;
+    const sort_by = "best_match";
+
+    const headers = {
+      Authorization:
+        "Bearer o7Hy7vuQYgzCO6VxjqImrn6A3XiCw7HfSv9KbofZBv2BzIJsNV1wp-l-OXpoibDkbyjPpq2pRx6L7NWdZG3eXWtzkC2i2ZgSrFGXCkO2bElErwdZ_1vikzLZav4XZnYx",
+      Accept: "application/json",
+    };
+
+     // Function to fetch user's current location
     const fetchUserLocation = async () => {
       try {
         // Request permission to access location
@@ -43,60 +59,77 @@ const HotelListScreen = ({navigation}) => {
         console.error('Error fetching user location:', error);
       }
     };
- 
-    // Function to fetch restaurant data from Yelp API
-    const fetchData = async () => {
-      try {
-        const term = 'restaurants';
-        const categories = 'Japanese';
-        const minValue = 1; 
-        const maxValue = 2; 
-        const limit = 20;
-        const sort_by = 'best_match';
-        const headers = {
-          Authorization: "Bearer o7Hy7vuQYgzCO6VxjqImrn6A3XiCw7HfSv9KbofZBv2BzIJsNV1wp-l-OXpoibDkbyjPpq2pRx6L7NWdZG3eXWtzkC2i2ZgSrFGXCkO2bElErwdZ_1vikzLZav4XZnYx",
-          Accept: "application/json",
-        };
- 
-        // Fetch user's current location if not already available
+    
+            // Fetch user's current location if not already available
         if (!userLocation) {
           await fetchUserLocation();
         }
- 
-        // Proceed with fetching restaurant data if user's location is available
+    
+    async function fetchData() {
+      try {
+        let priceRange;
+        if (minValue >= 0 && maxValue <= 10) {
+          priceRange = "1";
+        } else if (minValue >= 0 && maxValue <= 30) {
+          priceRange = "1,2";
+        } else if (minValue >= 0 && maxValue <= 100) {
+          priceRange = "1,2,3";
+        } else if (minValue >= 0 && maxValue > 100) {
+          priceRange = "1,2,3,4";
+        } else if (minValue > 10 && maxValue <= 30) {
+          priceRange = "2";
+        } else if (minValue > 10 && maxValue <= 100) {
+          priceRange = "2,3";
+        } else if (minValue > 10 && maxValue > 100) {
+          priceRange = "2,3,4";
+        } else if (minValue > 30 && maxValue <= 100) {
+          priceRange = "3";
+        } else if (minValue > 30 && maxValue > 100) {
+          priceRange = "3,4";
+        } else if (minValue > 100) {
+          priceRange = "4";
+        } else {
+          priceRange = "Invalid range";
+        }
+        
+                // Proceed with fetching restaurant data if user's location is available
         if (userLocation) {
           console.log('userlocation',userLocation)
-          const response = await axios.get(`https://api.yelp.com/v3/businesses/search?`, {
+        const response = await axios.get(
+          `https://api.yelp.com/v3/businesses/search?`,
+          {
             headers: headers,
             params: {
               term: term,
-              latitude: userLocation.latitude,
-              longitude: userLocation.longitude,
-              categories: categories,
-              price: `${minValue},${maxValue}`,
+              latitude: latitude,
+              longitude: longitude,
+              categories: selectedFood,
+              price: priceRange,
               limit: limit,
               sort_by: sort_by,
             },
+          }
           });
- 
-          const restaurantData = response.data.businesses.map((business) => ({
-            id: business.id,
-            restaurantName: business.name,
-            imageUri: { uri: business.image_url },
-            address: business.location.address1,
-          }));
- 
-          setRestaurants(restaurantData);
-          setLoading(false);
-        }
+
+        // console.log('response:',response);
+
+        const restaurantData = response.data.businesses.map((business) => ({
+          id: business.id,
+          restaurantName: business.name,
+          imageUri: { uri: business.image_url },
+          address: business.location.address1,
+        }));
+
+       // console.log(restaurantData);
+        setRestaurants(restaurantData);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
         setLoading(false);
       }
-    };
- 
-    // Function to load fonts
-    const loadFonts = async () => {
+    }
+
+    async function loadFonts() {
       await Font.loadAsync({
         Podkova: require("../assets/fonts/Podkova-Regular.ttf"),
       });
@@ -108,6 +141,7 @@ const HotelListScreen = ({navigation}) => {
  
   }, [userLocation]); // Fetch data whenever userLocation changes
  
+
   const handleSelectRestaurant = (restaurantId) => {
     setSelectedRestaurant(restaurantId);
   };
@@ -120,7 +154,8 @@ const HotelListScreen = ({navigation}) => {
     return null;
   }
   return (
-    <SafeAreaView style={styles.main_container}>
+
+    <ScrollView style={styles.main_container}>
       <View style={styles.first_row}>
         <View>
           <TouchableOpacity onPress={handleHomePress}>
@@ -140,7 +175,7 @@ const HotelListScreen = ({navigation}) => {
             key={restaurant.id}
             restaurantName={restaurant.restaurantName}
             imageUri={restaurant.imageUri}
-            Address={restaurant.Address}
+            Address={restaurant.address}
             onPress={() => handleSelectRestaurant(restaurant.id)}
             isSelected={selectedRestaurant === restaurant.id}
           />
@@ -154,7 +189,8 @@ const HotelListScreen = ({navigation}) => {
           <Text style={styles.takeMeThereText}>TAKE ME THERE</Text>
         </TouchableOpacity>
       )}
-    </SafeAreaView>
+
+    </ScrollView>
   );
 };
  
