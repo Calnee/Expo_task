@@ -15,7 +15,7 @@ import { useEffect, useState } from "react";
 type foodType = {
   foodType: string;
   defaultSelected?: boolean; // changed
-  onPress?: () => void;
+  onPress?: (selectedFood: string) => void;
 };
 const FoodType = ({ foodType,defaultSelected, onPress }: foodType) => {
 
@@ -32,7 +32,7 @@ const FoodType = ({ foodType,defaultSelected, onPress }: foodType) => {
   const handlePress = () => {
     setSelected(!selected);
     if (onPress) {
-      onPress();
+      onPress(foodType);
     }
   };
   return (

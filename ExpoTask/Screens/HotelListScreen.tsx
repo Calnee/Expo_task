@@ -12,51 +12,100 @@ import { Border, Color, FontFamily, Padding } from "../GlobalStyles";
 import * as Font from "expo-font";
 import { RestaurantView } from "../components/atom/RestaurantComponent";
 import { SafeAreaView } from "react-native-safe-area-context";
+import axios from "axios";
 
-export const RestaurantList = [
-  {
-    id: "1",
-    restaurantName: "Mc Donalds",
-    imageUri: require("../assets/images/Mc.png"),
-    Address: "1234 45th AVE SE, Seattle, WA",
-  },
-  {
-    id: "2",
-    restaurantName: "BurgerKing",
-    imageUri: require("../assets/images/burgerking.png"),
-    Address: "1234 45th AVE SE, Seattle, WA",
-  },
-  {
-    id: "3",
-    restaurantName: "Wendy's",
-    imageUri: require("../assets/images/wendys.png"),
-    Address: "1234 45th AVE SE, Seattle, WA",
-  },
-  {
-    id: "4",
-    restaurantName: "Jack in the box",
-    imageUri: require("../assets/images/jack.png"),
-    Address: "1234 45th AVE SE, Seattle, WA",
-  },
-];
-
-const HotelListScreen = ({navigation}) => {
+const HotelListScreen = ({ navigation, route }) => {
   const [fontLoaded, setFontLoaded] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [restaurants, setRestaurants] = useState([]);
+  const { minValue, maxValue, selectedFood } = route.params;
 
   const handleHomePress = () => {
-    navigation.navigate('HomeScreen');
+    navigation.navigate("HomeScreen");
     // navigation.navigate('Main');
-};
+  };
 
   useEffect(() => {
+    const term = "restaurants";
+    const latitude = 41.4899827;
+    const longitude = -71.3137707;
+    const limit = 10;
+    const sort_by = "best_match";
+
+    const headers = {
+      Authorization:
+        "Bearer o7Hy7vuQYgzCO6VxjqImrn6A3XiCw7HfSv9KbofZBv2BzIJsNV1wp-l-OXpoibDkbyjPpq2pRx6L7NWdZG3eXWtzkC2i2ZgSrFGXCkO2bElErwdZ_1vikzLZav4XZnYx",
+      Accept: "application/json",
+    };
+
+    async function fetchData() {
+      try {
+        let priceRange;
+        if (minValue >= 0 && maxValue <= 10) {
+          priceRange = "1";
+        } else if (minValue >= 0 && maxValue <= 30) {
+          priceRange = "1,2";
+        } else if (minValue >= 0 && maxValue <= 100) {
+          priceRange = "1,2,3";
+        } else if (minValue >= 0 && maxValue > 100) {
+          priceRange = "1,2,3,4";
+        } else if (minValue > 10 && maxValue <= 30) {
+          priceRange = "2";
+        } else if (minValue > 10 && maxValue <= 100) {
+          priceRange = "2,3";
+        } else if (minValue > 10 && maxValue > 100) {
+          priceRange = "2,3,4";
+        } else if (minValue > 30 && maxValue <= 100) {
+          priceRange = "3";
+        } else if (minValue > 30 && maxValue > 100) {
+          priceRange = "3,4";
+        } else if (minValue > 100) {
+          priceRange = "4";
+        } else {
+          priceRange = "Invalid range";
+        }
+        const response = await axios.get(
+          `https://api.yelp.com/v3/businesses/search?`,
+          {
+            headers: headers,
+            params: {
+              term: term,
+              latitude: latitude,
+              longitude: longitude,
+              categories: selectedFood,
+              price: priceRange,
+              limit: limit,
+              sort_by: sort_by,
+            },
+          }
+        );
+
+        // console.log('response:',response);
+
+        const restaurantData = response.data.businesses.map((business) => ({
+          id: business.id,
+          restaurantName: business.name,
+          imageUri: { uri: business.image_url },
+          address: business.location.address1,
+        }));
+
+       // console.log(restaurantData);
+        setRestaurants(restaurantData);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoading(false);
+      }
+    }
+
     async function loadFonts() {
       await Font.loadAsync({
         Podkova: require("../assets/fonts/Podkova-Regular.ttf"),
       });
       setFontLoaded(true);
     }
-
+    fetchData();
     loadFonts();
   }, []);
 
@@ -72,8 +121,7 @@ const HotelListScreen = ({navigation}) => {
     return null;
   }
   return (
- 
-    <SafeAreaView style={styles.main_container}>
+    <ScrollView style={styles.main_container}>
       <View style={styles.first_row}>
         <View>
           <TouchableOpacity onPress={handleHomePress}>
@@ -88,12 +136,12 @@ const HotelListScreen = ({navigation}) => {
         </View>
       </View>
       <View style={styles.second_row}>
-        {RestaurantList.map((restaurant) => (
+        {restaurants.map((restaurant) => (
           <RestaurantView
             key={restaurant.id}
             restaurantName={restaurant.restaurantName}
             imageUri={restaurant.imageUri}
-            Address={restaurant.Address}
+            Address={restaurant.address}
             onPress={() => handleSelectRestaurant(restaurant.id)}
             isSelected={selectedRestaurant === restaurant.id}
           />
@@ -107,8 +155,7 @@ const HotelListScreen = ({navigation}) => {
           <Text style={styles.takeMeThereText}>TAKE ME THERE</Text>
         </TouchableOpacity>
       )}
-    </SafeAreaView>
-
+    </ScrollView>
   );
 };
 
