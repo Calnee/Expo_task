@@ -24,7 +24,7 @@ const HotelListScreen = ({ navigation, route }) => {
   const [restaurants, setRestaurants] = useState([]);
 
   const [userLocation, setUserLocation] = useState(null); // State to store user's current location
-  const { minValue, maxValue, selectedFood } = route.params;
+  const { minValue, maxValue, foodType } = route.params;
 
   const handleHomePress = () => {
     navigation.navigate("HomeScreen");
@@ -94,6 +94,7 @@ const HotelListScreen = ({ navigation, route }) => {
             priceRange = "Invalid range";
           }
 
+          console.log("category",foodType);
           const response = await axios.get(
             `https://api.yelp.com/v3/businesses/search?`,
             {
@@ -102,7 +103,7 @@ const HotelListScreen = ({ navigation, route }) => {
                 term: term,
                 latitude: latitude,
                 longitude: longitude,
-                categories: selectedFood,
+                categories: foodType,
                 price: priceRange,
                 limit: limit,
                 sort_by: sort_by,
@@ -137,7 +138,7 @@ const HotelListScreen = ({ navigation, route }) => {
     fetchData(); // Fetch restaurant data
     loadFonts(); // Load fonts
 
-  }, [userLocation, minValue, maxValue, selectedFood]);
+  }, [userLocation, minValue, maxValue, foodType]);
 
   const handleSelectRestaurant = (restaurantId) => {
     setSelectedRestaurant(restaurantId);
