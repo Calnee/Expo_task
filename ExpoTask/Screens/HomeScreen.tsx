@@ -45,7 +45,7 @@ export const feeds = [
   },
   {
     id: "7",
-    foodType: "CURRY",
+    foodType: "THAI",
   },
   {
     id: "8",
@@ -53,7 +53,7 @@ export const feeds = [
   },
   {
     id: "9",
-    foodType: "NOODLES",
+    foodType: "CAKE",
   },
   {
     id: "10",
@@ -65,7 +65,7 @@ export const feeds = [
   },
   {
     id: "12",
-    foodType: "SALAD",
+    foodType: "ARABIAN",
   },
 ];
 //Budget component data
@@ -79,6 +79,7 @@ const HomeScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredFoodTypes, setFilteredFoodTypes] = useState(feeds);
   const defaultSelectedFoodType = "FASTFOOD";
+  const [selectedFood, setSelectedFood] = useState(defaultSelectedFoodType);
 
   const [inputChanged, setInputChanged] = useState(false);
 
@@ -94,9 +95,22 @@ const HomeScreen = ({ navigation }) => {
     setValues(values);
   };
 
-  const handleHotelListPress = () => {
+  const handleFoodTypePress = (selectedFood) => {
+    setSelectedFood(selectedFood);
+  };
 
-    navigation.navigate("HotelListScreen");
+  const handleHotelListPress = () => {
+    const minValue = values[0]; // Assign values here
+    const maxValue = values[1];
+    const foodType = selectedFood.toLowerCase();
+    console.log("Food type:", foodType);
+    navigation.navigate("HotelListScreen", {
+      minValue: values[0],
+      maxValue: values[1],
+      foodType: selectedFood.toLowerCase(),
+    });
+    console.log("minValue:", minValue);
+    console.log("maxValue:", maxValue);
   };
 
   const SeparatorComponent = () => <View style={styles.separator} />;
@@ -130,9 +144,13 @@ const HomeScreen = ({ navigation }) => {
           horizontal={true}
           showsHorizontalScrollIndicator={false}
           data={filteredFoodTypes}
-
-          renderItem={({ item }) => <FoodType foodType={item.foodType} defaultSelected={defaultSelectedFoodType === item.foodType}   />}
-
+          renderItem={({ item }) => (
+            <FoodType
+              foodType={item.foodType}
+              defaultSelected={defaultSelectedFoodType === item.foodType}
+              onPress={handleFoodTypePress}
+            />
+          )}
           keyExtractor={(item) => item.id}
           ItemSeparatorComponent={SeparatorComponent}
           contentContainerStyle={[
