@@ -14,11 +14,15 @@ import { RestaurantView } from "../components/atom/RestaurantComponent";
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 
+import * as Location from 'expo-location'; // Import Location module from Expo
 const HotelListScreen = ({ navigation, route }) => {
+
   const [fontLoaded, setFontLoaded] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [restaurants, setRestaurants] = useState([]);
+
+  const [userLocation, setUserLocation] = useState(null); // State to store user's current location
   const { minValue, maxValue, selectedFood } = route.params;
 
   const handleHomePress = () => {
@@ -39,6 +43,28 @@ const HotelListScreen = ({ navigation, route }) => {
       Accept: "application/json",
     };
 
+     // Function to fetch user's current location
+    const fetchUserLocation = async () => {
+      try {
+        // Request permission to access location
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          console.error('Permission to access location was denied');
+          return;
+        }
+        // Get user's current location
+        let location = await Location.getCurrentPositionAsync({});
+        setUserLocation(location.coords); // Set user's current location
+      } catch (error) {
+        console.error('Error fetching user location:', error);
+      }
+    };
+    
+            // Fetch user's current location if not already available
+        if (!userLocation) {
+          await fetchUserLocation();
+        }
+    
     async function fetchData() {
       try {
         let priceRange;
@@ -65,6 +91,10 @@ const HotelListScreen = ({ navigation, route }) => {
         } else {
           priceRange = "Invalid range";
         }
+        
+                // Proceed with fetching restaurant data if user's location is available
+        if (userLocation) {
+          console.log('userlocation',userLocation)
         const response = await axios.get(
           `https://api.yelp.com/v3/businesses/search?`,
           {
@@ -79,7 +109,7 @@ const HotelListScreen = ({ navigation, route }) => {
               sort_by: sort_by,
             },
           }
-        );
+          });
 
         // console.log('response:',response);
 
@@ -104,23 +134,27 @@ const HotelListScreen = ({ navigation, route }) => {
         Podkova: require("../assets/fonts/Podkova-Regular.ttf"),
       });
       setFontLoaded(true);
-    }
-    fetchData();
-    loadFonts();
-  }, []);
+    };
+ 
+    fetchData(); // Fetch restaurant data
+    loadFonts(); // Load fonts
+ 
+  }, [userLocation]); // Fetch data whenever userLocation changes
+ 
 
   const handleSelectRestaurant = (restaurantId) => {
     setSelectedRestaurant(restaurantId);
   };
-
+ 
   const handleTakeMeThere = () => {
     console.log("Take me there button pressed");
   };
-
+ 
   if (!fontLoaded) {
     return null;
   }
   return (
+
     <ScrollView style={styles.main_container}>
       <View style={styles.first_row}>
         <View>
@@ -155,16 +189,16 @@ const HotelListScreen = ({ navigation, route }) => {
           <Text style={styles.takeMeThereText}>TAKE ME THERE</Text>
         </TouchableOpacity>
       )}
+
     </ScrollView>
   );
 };
-
+ 
 const { width, height } = Dimensions.get("window");
 const styles = StyleSheet.create({
   main_container: {
     width: width,
     height: height,
-    //marginTop: 20,
     backgroundColor: Color.bGNavy900,
   },
   main_heading: {
@@ -204,5 +238,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
+ 
 export { HotelListScreen };

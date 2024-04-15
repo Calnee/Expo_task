@@ -25,10 +25,10 @@ const FoodType = ({ foodType,defaultSelected, onPress }: foodType) => {
     setSelected(defaultSelected || false);
   }, [defaultSelected]);
 
+
   // const handlePress = () => {
   //   setSelected(!selected);
   // };
-
   const handlePress = () => {
     setSelected(!selected);
     if (onPress) {
