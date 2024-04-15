@@ -2,6 +2,7 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { HomeScreen } from "../Screens/HomeScreen";
 import { HotelListScreen } from "../Screens/HotelListScreen";
+import FoodFinderRestaurantList from "../yelpEx";
 
 const StackNav = createNativeStackNavigator();
 export function HomeStackNavigation() {
@@ -16,8 +17,8 @@ export function HomeStackNavigation() {
       />
 
       <StackNav.Screen
-        name="HotelListScreen"
-        component={HotelListScreen}
+        name="FoodFinderRestaurantList"
+        component={FoodFinderRestaurantList}
         options={{
           headerShown: false,
         }}
