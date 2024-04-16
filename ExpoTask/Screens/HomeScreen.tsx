@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -16,6 +15,7 @@ import { SelectButton } from "../components/atom/SelectButton";
 import { DeSelectButton } from "../components/atom/DeSelectButton";
 import { FoodType } from "../components/atom/FoodType";
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
+import { useState } from "react";
 //foodType data
 export const feeds = [
   {
@@ -24,11 +24,11 @@ export const feeds = [
   },
   {
     id: "2",
-    foodType: "TERIYAKI",
+    foodType: "Sandwiches",
   },
   {
     id: "3",
-    foodType: "TACOS",
+    foodType: "Noodles",
   },
   {
     id: "4",
@@ -36,7 +36,7 @@ export const feeds = [
   },
   {
     id: "5",
-    foodType: "BBQ",
+    foodType: "Breakfast & Brunch",
   },
   {
     id: "6",
@@ -44,7 +44,7 @@ export const feeds = [
   },
   {
     id: "7",
-    foodType: "CURRY",
+    foodType: "THAI",
   },
   {
     id: "8",
@@ -52,7 +52,7 @@ export const feeds = [
   },
   {
     id: "9",
-    foodType: "NOODLES",
+    foodType: "Desserts",
   },
   {
     id: "10",
@@ -60,11 +60,11 @@ export const feeds = [
   },
   {
     id: "11",
-    foodType: "PASTA",
+    foodType: "Ramen",
   },
   {
     id: "12",
-    foodType: "SALAD",
+    foodType: "Mediterranean",
   },
  
 ];
@@ -74,10 +74,14 @@ export const budget = {
   amount: 114,
 };
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
   const [values, setValues] = useState([0, budget.amount]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredFoodTypes, setFilteredFoodTypes] = useState(feeds);
+  const defaultSelectedFoodType = "FASTFOOD";
+  const [selectedFood, setSelectedFood] = useState(defaultSelectedFoodType);
+
+  const [inputChanged, setInputChanged] = useState(false);
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -89,6 +93,24 @@ const HomeScreen = () => {
 
   const multiSliderValuesChange = (values) => {
     setValues(values);
+  };
+
+  const handleFoodTypePress = (selectedFood) => {
+    setSelectedFood(selectedFood);
+  };
+
+  const handleHotelListPress = () => {
+    const minValue = values[0]; // Assign values here
+    const maxValue = values[1];
+    const foodType = selectedFood.toLowerCase();
+    console.log("Food type:", foodType);
+    navigation.navigate("HotelListScreen", {
+      minValue: values[0],
+      maxValue: values[1],
+      foodType: selectedFood.toLowerCase(),
+    });
+    console.log("minValue:", minValue);
+    console.log("maxValue:", maxValue);
   };
 
   const SeparatorComponent = () => <View style={styles.separator} />;
@@ -107,14 +129,28 @@ const HomeScreen = () => {
         </View>
         <Text style={styles.titleText}>Food Finder</Text>
         <Text style={styles.textHome}>What kind of food?</Text>
-        <SearchComponent onSearch={handleSearch} />
+        <SearchComponent
+          onSearch={handleSearch}
+          hidden={false}
+          value={searchQuery}
+          setter={(val) => {
+            setInputChanged(true);
+            setSearchQuery(val);
+          }}
+        />
 
         {/* food Types */}
         <FlatList
           horizontal={true}
           showsHorizontalScrollIndicator={false}
           data={filteredFoodTypes}
-          renderItem={({ item }) => <FoodType foodType={item.foodType} />}
+          renderItem={({ item }) => (
+            <FoodType
+              foodType={item.foodType}
+              defaultSelected={defaultSelectedFoodType === item.foodType}
+              onPress={handleFoodTypePress}
+            />
+          )}
           keyExtractor={(item) => item.id}
           ItemSeparatorComponent={SeparatorComponent}
           scrollEventThrottle={16}
@@ -165,7 +201,7 @@ const HomeScreen = () => {
           </View>
         </TouchableOpacity>
         <View style={styles.buttonContainer}>
-          <SelectButton text="SEARCH" onPress={undefined} />
+          <SelectButton text="SEARCH" onPress={handleHotelListPress} />
           <DeSelectButton text="CANCEL" onPress={undefined} />
         </View>
       </View>
@@ -179,6 +215,7 @@ const styles = StyleSheet.create({
     width,
     height,
     backgroundColor: Color.bGNavy900,
+    //marginTop:44
   },
   iconContainer: {
     backgroundColor: Color.blueGreen,

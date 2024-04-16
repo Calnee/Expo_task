@@ -8,17 +8,32 @@ import {
   FlatList,
 } from "react-native";
 import { Border, Color, FontSize, Padding } from "../../GlobalStyles";
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
+
 
 type foodType = {
   foodType: string;
-  onPress?: () => void;
+  defaultSelected?: boolean; // changed
+  onPress?: (selectedFood: string) => void;
 };
-const FoodType = ({ foodType, onPress }: foodType) => {
-  const [selected, setSelected] = useState(false);
+const FoodType = ({ foodType,defaultSelected, onPress }: foodType) => {
 
+  const [selected, setSelected] = useState(defaultSelected||false);
+
+  useEffect(() => {
+    setSelected(defaultSelected || false);
+  }, [defaultSelected]);
+
+
+  // const handlePress = () => {
+  //   setSelected(!selected);
+  // };
   const handlePress = () => {
     setSelected(!selected);
+    if (onPress) {
+      onPress(foodType);
+    }
   };
   return (
     <TouchableOpacity onPress={handlePress}>
@@ -37,7 +52,7 @@ const FoodType = ({ foodType, onPress }: foodType) => {
     </TouchableOpacity>
   );
 };
-
+ 
 const styles = StyleSheet.create({
   mainView: {
     alignSelf: "center",
@@ -65,5 +80,5 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
 });
-
+ 
 export { FoodType };
