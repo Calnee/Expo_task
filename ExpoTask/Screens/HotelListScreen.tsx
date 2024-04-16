@@ -153,6 +153,7 @@ const HotelListScreen = ({ navigation, route }) => {
   }
 
   return (
+    // <SafeAreaView>
     <ScrollView style={styles.main_container}>
       <View style={styles.first_row}>
         <View>
@@ -188,6 +189,7 @@ const HotelListScreen = ({ navigation, route }) => {
         </TouchableOpacity>
       )}
     </ScrollView>
+  
   );
 };
 
