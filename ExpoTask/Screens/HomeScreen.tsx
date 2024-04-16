@@ -15,7 +15,9 @@ import { SelectButton } from "../components/atom/SelectButton";
 import { DeSelectButton } from "../components/atom/DeSelectButton";
 import { FoodType } from "../components/atom/FoodType";
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
-import { useState } from "react";
+import Geolocation from 'c';
+import { PermissionsAndroid, Platform } from 'react-native';
+import { useEffect, useState } from "react";
 //foodType data
 export const feeds = [
   {
@@ -81,6 +83,62 @@ const HomeScreen = ({ navigation }) => {
   const [selectedFood, setSelectedFood] = useState(defaultSelectedFoodType);
 
   const [inputChanged, setInputChanged] = useState(false);
+  const [locationPermissionGranted, setLocationPermissionGranted] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState(null);
+
+
+  useEffect(() => {
+    requestLocationPermission();
+  }, []);
+
+  const requestLocationPermission = async () => {
+    try {
+      if (Platform.OS === "android") {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: "Location Permission",
+            message:
+              "Food Finder needs access to your location to provide recommendations.",
+            buttonPositive: "OK",
+          }
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          setLocationPermissionGranted(true);
+        } else {
+          setLocationPermissionGranted(false);
+        }
+      } else {
+        console.warn(
+          "Location permission not handled for this platform:",
+          Platform.OS
+        );
+      }
+    } catch (error) {
+      console.error("Error requesting location permission:", error);
+      setLocationPermissionGranted(false);
+    }
+  };
+
+  useEffect(() => {
+    // Get current position when location permission is granted
+    if (locationPermissionGranted) {
+      Geolocation.getCurrentPosition(
+        (position) => {
+          // Extract latitude and longitude from position object
+          const { latitude, longitude } = position.coords;
+          // Set current location state
+          setCurrentLocation({ latitude, longitude });
+          // Log latitude and longitude to console
+          console.log("Latitude:", latitude);
+          console.log("Longitude:", longitude);
+        },
+        (error) => {
+          console.error("Error getting current position:", error);
+        }
+      );
+    }
+  }, [locationPermissionGranted]);
 
   const handleSearch = (query) => {
     setSearchQuery(query);
