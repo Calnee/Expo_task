@@ -101,12 +101,12 @@ const HomeScreen = ({ navigation }) => {
   const handleHotelListPress = () => {
     const minValue = values[0]; // Assign values here
     const maxValue = values[1];
-    const foodType = selectedFood.toLowerCase();
-    console.log("Food type:", foodType);
+    const cuisineSelected = selectedFood.toLowerCase();
+    console.log("Food type:", cuisineSelected);
     navigation.navigate("HotelListScreen", {
       minValue: values[0],
       maxValue: values[1],
-      foodType: selectedFood.toLowerCase(),
+      cuisineSelected: selectedFood.toLowerCase(),
     });
     console.log("minValue:", minValue);
     console.log("maxValue:", maxValue);

@@ -6,25 +6,24 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
+  FlatList,
+  Animated,
+  Linking,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Border, Color, FontFamily } from "../GlobalStyles";
 import * as Font from "expo-font";
-import { RestaurantView } from "../components/atom/RestaurantComponent";
-import { SafeAreaView } from "react-native-safe-area-context";
-import axios from "axios";
-
-import * as Location from 'expo-location';
+import MarqueeText from "react-native-marquee";
+import * as Location from "expo-location";
 
 const HotelListScreen = ({ navigation, route }) => {
-
   const [fontLoaded, setFontLoaded] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [restaurants, setRestaurants] = useState([]);
 
   const [userLocation, setUserLocation] = useState(null); // State to store user's current location
-  const { minValue, maxValue, foodType } = route.params;
+  const { minValue, maxValue, cuisineSelected } = route.params;
 
   const handleHomePress = () => {
     navigation.navigate("HomeScreen");
@@ -37,15 +36,15 @@ const HotelListScreen = ({ navigation, route }) => {
       try {
         // Request permission to access location
         let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          console.error('Permission to access location was denied');
+        if (status !== "granted") {
+          console.error("Permission to access location was denied");
           return;
         }
         // Get user's current location
         let location = await Location.getCurrentPositionAsync({});
         setUserLocation(location.coords); // Set user's current location
       } catch (error) {
-        console.error('Error fetching user location:', error);
+        console.error("Error fetching user location:", error);
       }
     };
 
@@ -54,14 +53,14 @@ const HotelListScreen = ({ navigation, route }) => {
       fetchUserLocation();
     }
 
-    async function fetchData() {
+    async function getHotelList() {
       try {
         // Proceed with fetching restaurant data if user's location is available
         if (userLocation) {
           const term = "restaurants";
           const latitude = userLocation.latitude;
           const longitude = userLocation.longitude;
-          const limit = 10;
+          const limit = 20;
           const sort_by = "best_match";
           const headers = {
             Authorization:
@@ -76,50 +75,35 @@ const HotelListScreen = ({ navigation, route }) => {
             priceRange = "1,2";
           } else if (minValue >= 0 && maxValue <= 100) {
             priceRange = "1,2,3";
-          } else if (minValue >= 0 && maxValue > 100) {
+          } else if (minValue >= 0 && maxValue >= 100) {
             priceRange = "1,2,3,4";
-          } else if (minValue > 10 && maxValue <= 30) {
-            priceRange = "2";
-          } else if (minValue > 10 && maxValue <= 100) {
-            priceRange = "2,3";
-          } else if (minValue > 10 && maxValue > 100) {
-            priceRange = "2,3,4";
-          } else if (minValue > 30 && maxValue <= 100) {
-            priceRange = "3";
-          } else if (minValue > 30 && maxValue > 100) {
-            priceRange = "3,4";
-          } else if (minValue > 100) {
-            priceRange = "4";
           } else {
             priceRange = "Invalid range";
           }
 
-          console.log("category",foodType);
-          const response = await axios.get(
-            `https://api.yelp.com/v3/businesses/search?`,
+          console.log("category", cuisineSelected);
+          fetch(
+            `https://api.yelp.com/v3/businesses/search?term=${term}&latitude=${latitude}&longitude=${longitude}&categories=${cuisineSelected}&limit=${limit}&sort_by=${sort_by}&price=${priceRange}`,
             {
+              method: "GET",
               headers: headers,
-              params: {
-                term: term,
-                latitude: latitude,
-                longitude: longitude,
-                categories: foodType,
-                price: priceRange,
-                limit: limit,
-                sort_by: sort_by,
-              },
             }
-          );
-
-          const restaurantData = response.data.businesses.map((business) => ({
-            id: business.id,
-            restaurantName: business.name,
-            imageUri: { uri: business.image_url },
-            address: business.location.address1,
-          }));
-
-          setRestaurants(restaurantData);
-          setLoading(false);
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              //console.log(JSON.stringify(data));
+              const restaurantData = data.businesses.map((business) => ({
+                id: business.id,
+                restaurantName: business.name,
+                imageUri: { uri: business.image_url },
+                address: business.location.address1,
+                rating: business.rating,
+                price: business.price,
+                menuUrl: business.attributes?.menu_url || null,
+              }));
+              setRestaurants(restaurantData);
+              setLoading(false);
+            });
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -127,34 +111,140 @@ const HotelListScreen = ({ navigation, route }) => {
       }
     }
 
-    //load fonts
     async function loadFonts() {
       await Font.loadAsync({
         Podkova: require("../assets/fonts/Podkova-Regular.ttf"),
       });
       setFontLoaded(true);
-    };
+    }
 
-    fetchData(); // Fetch restaurant data
-    loadFonts(); // Load fonts
-
-  }, [userLocation, minValue, maxValue, foodType]);
+    getHotelList();
+    loadFonts(); // Fetch restaurant data
+  }, [userLocation, minValue, maxValue, cuisineSelected]);
 
   const handleSelectRestaurant = (restaurantId) => {
     setSelectedRestaurant(restaurantId);
-  };
-
-  const handleTakeMeThere = () => {
-    console.log("Take me there button pressed");
   };
 
   if (!fontLoaded) {
     return null;
   }
 
+  const getPriceLabel = (price) => {
+    switch (price) {
+      case "$":
+        return ["$", "Low"];
+      case "$$":
+        return ["$$", "Medium"];
+      case "$$$":
+        return ["$$$", "High"];
+      case "$$$$":
+        return ["$$$$", "High"];
+      default:
+        return ["", ""];
+    }
+  };
+
+  const renderItem = ({
+    item,
+  }: {
+    item: {
+      restaurantName: string;
+      imageUri: any;
+      address: string;
+      price: string;
+      menuUrl: any;
+      onPress: () => void;
+      isSelected: boolean;
+    };
+  }) => {
+    const {
+      restaurantName,
+      imageUri,
+      address,
+      onPress,
+      isSelected,
+      menuUrl,
+      price,
+    } = item;
+
+    const handleWebIconPress = () => {
+      if (menuUrl) {
+        Linking.openURL(menuUrl);
+      }
+    };
+    // console.log(menuUrl);
+    //console.log(typeof price);
+    const [symbol, label] = getPriceLabel(price);
+
+    return (
+      <TouchableOpacity
+        onPress={onPress}
+        style={[
+          styles.restaurant_container,
+          isSelected ? styles.selected : null,
+        ]}
+      >
+        <View style={styles.logo_container}>
+          <Image
+            source={imageUri}
+            style={styles.image_style}
+            resizeMode="contain"
+          />
+        </View>
+        <View style={styles.text_container_main}>
+          {/* {restaurantName.length > 15 ? (
+            <MarqueeText
+              style={styles.restaurantName}
+              speed={1}
+              marqueeOnStart={true}
+              loop={true}
+              delay={1000}
+            >
+              {restaurantName}
+            </MarqueeText>
+          ) : (
+            <Text style={styles.restaurantName}>{restaurantName}</Text>
+          )} */}
+
+          <MarqueeText
+            style={styles.restaurantName}
+            speed={1}
+            marqueeOnStart={true}
+            loop={true}
+            delay={1000}
+          >
+            {restaurantName.length > 24
+              ? `${restaurantName}    ${restaurantName}`
+              : restaurantName}
+          </MarqueeText>
+          <Text style={styles.address_font}>{address}</Text>
+          <Text style={styles.price}>
+            {" "}
+            {symbol} {label}
+          </Text>
+        </View>
+        {menuUrl && (
+          <TouchableOpacity
+            onPress={handleWebIconPress}
+            style={styles.webContainer}
+          >
+            <View>
+              <Image
+                source={require("../assets/images/website.png")}
+                style={styles.webIcon}
+                resizeMode="contain"
+              />
+            </View>
+          </TouchableOpacity>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
   return (
     // <SafeAreaView>
-    <ScrollView style={styles.main_container}>
+    <View style={styles.main_container}>
       <View style={styles.first_row}>
         <View>
           <TouchableOpacity onPress={handleHomePress}>
@@ -169,27 +259,13 @@ const HotelListScreen = ({ navigation, route }) => {
         </View>
       </View>
       <View style={styles.second_row}>
-        {restaurants.map((restaurant) => (
-          <RestaurantView
-            key={restaurant.id}
-            restaurantName={restaurant.restaurantName}
-            imageUri={restaurant.imageUri}
-            Address={restaurant.address}
-            onPress={() => handleSelectRestaurant(restaurant.id)}
-            isSelected={selectedRestaurant === restaurant.id}
-          />
-        ))}
+        <FlatList
+          data={restaurants}
+          renderItem={renderItem} // Step 2: Pass renderItem as renderItem prop
+          keyExtractor={(item) => item.id} // Step 5: Specify unique key extractor
+        />
       </View>
-      {selectedRestaurant && (
-        <TouchableOpacity
-          onPress={handleTakeMeThere}
-          style={styles.takeMeThereButton}
-        >
-          <Text style={styles.takeMeThereText}>TAKE ME THERE</Text>
-        </TouchableOpacity>
-      )}
-    </ScrollView>
-  
+    </View>
   );
 };
 
@@ -235,6 +311,62 @@ const styles = StyleSheet.create({
     marginLeft: 180,
     fontFamily: FontFamily.podkovaSemiBold,
     marginBottom: 10,
+  },
+  //Rstaurant component styles
+  restaurant_container: {
+    width: "100%",
+    height: 100,
+    backgroundColor: Color.black,
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignSelf: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: Color.wHITE,
+  },
+  logo_container: {
+    width: "23%",
+    paddingLeft: 10,
+    alignSelf: "center",
+  },
+  text_container_main: {
+    width: "60%",
+    height: 50,
+    paddingLeft: 0,
+    marginLeft: 0,
+    alignSelf: "center",
+  },
+  restaurantName: {
+    color: "white",
+    fontSize: 20,
+    fontFamily: "Source Sans Pro",
+    fontWeight: "400",
+    paddingLeft: 0,
+    marginLeft: 0,
+  },
+  image_style: {
+    width: 50,
+    height: 50,
+  },
+  address_font: {
+    color: "white",
+    fontSize: 12,
+    fontFamily: "Source Sans Pro",
+  },
+  price: {
+    fontSize: 12,
+    color: Color.wHITE,
+  },
+  selected: {
+    borderColor: Color.neonBlue,
+    borderWidth: 2,
+  },
+  webContainer: {
+    justifyContent: "center",
+    marginLeft: 10,
+  },
+  webIcon: {
+    width: 25,
+    height: 29,
   },
 });
 

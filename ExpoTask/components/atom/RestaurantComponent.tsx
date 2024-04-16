@@ -15,13 +15,13 @@ import { Border, Color, Padding } from "../../GlobalStyles";
 const RestaurantView = ({
   restaurantName,
   imageUri,
-  Address,
+  address,
   onPress,
   isSelected,
 }: {
   restaurantName: string;
   imageUri: any;
-  Address: string;
+  address: string;
   onPress: () => void;
   isSelected: boolean;
 }) => {
@@ -57,7 +57,7 @@ const RestaurantView = ({
           </View>
           <View style={styles.text_container_main}>
             <Text style={styles.font_color}>{restaurantName}</Text>
-            <Text style={styles.address_font}>{Address}</Text>
+            <Text style={styles.address_font}>{address}</Text>
           </View>
         </View>
       </SafeAreaView>
