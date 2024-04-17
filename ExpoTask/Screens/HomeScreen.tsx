@@ -15,7 +15,9 @@ import { SelectButton } from "../components/atom/SelectButton";
 import { DeSelectButton } from "../components/atom/DeSelectButton";
 import { FoodType } from "../components/atom/FoodType";
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Geolocation from "@react-native-community/geolocation";
+import { PermissionsAndroid, Platform } from "react-native";
 //foodType data
 export const feeds = [
   {
@@ -82,6 +84,67 @@ const HomeScreen = ({ navigation }) => {
 
   const [inputChanged, setInputChanged] = useState(false);
 
+  //geolocation
+  const [locationPermissionGranted, setLocationPermissionGranted] =
+    useState(false);
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [latitude, setLatitude] = useState(null); // State for latitude
+  const [longitude, setLongitude] = useState(null); // State for longitude
+
+  useEffect(() => {
+    requestLocationPermission();
+  }, []);
+
+  const requestLocationPermission = async () => {
+    try {
+      if (Platform.OS === "android") {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: "Location Permission",
+            message:
+              "Food Finder needs access to your location to provide recommendations.",
+            buttonPositive: "OK",
+          }
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          setLocationPermissionGranted(true);
+        } else {
+          setLocationPermissionGranted(false);
+        }
+      } else {
+        console.warn(
+          "Location permission not handled for this platform:",
+          Platform.OS
+        );
+      }
+    } catch (error) {
+      console.error("Error requesting location permission:", error);
+      setLocationPermissionGranted(false);
+    }
+  };
+
+  useEffect(() => {
+    // Get current position when location permission is granted
+    if (locationPermissionGranted) {
+      Geolocation.getCurrentPosition(
+        (position) => {
+          // Extract latitude and longitude from position object
+          const { latitude, longitude } = position.coords;
+          // Set current location state
+          setCurrentLocation({ latitude, longitude });
+          setLatitude(latitude);
+          setLongitude(longitude);
+          console.log("Latitude:", latitude);
+          console.log("Longitude:", longitude);
+        },
+        (error) => {
+          console.error("Error getting current position:", error);
+        }
+      );
+    }
+  }, [locationPermissionGranted]);
+
   const handleSearch = (query) => {
     setSearchQuery(query);
     const filtered = feeds.filter((item) =>
@@ -99,18 +162,13 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleHotelListPress = () => {
-    // const minValue = values[0]; // Assign values here
-    // const maxValue = values[1];
-    // const cuisineSelected = selectedFood.toLowerCase();
-
     navigation.navigate("HotelListScreen", {
       minValue: values[0],
       maxValue: values[1],
       cuisineSelected: selectedFood.toLowerCase(),
+      lat: latitude,
+      long: longitude,
     });
-    // console.log("Food type:", cuisineSelected);
-    // console.log("minValue:", minValue);
-    // console.log("maxValue:", maxValue);
   };
 
   const SeparatorComponent = () => <View style={styles.separator} />;

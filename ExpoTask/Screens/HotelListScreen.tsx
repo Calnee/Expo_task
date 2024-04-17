@@ -15,6 +15,7 @@ import { Border, Color, FontFamily } from "../GlobalStyles";
 import * as Font from "expo-font";
 import MarqueeText from "react-native-marquee";
 import * as Location from "expo-location";
+import { useToast } from "react-native-toast-notifications";
 
 const HotelListScreen = ({ navigation, route }) => {
   const [fontLoaded, setFontLoaded] = useState(false);
@@ -23,7 +24,8 @@ const HotelListScreen = ({ navigation, route }) => {
   const [restaurants, setRestaurants] = useState([]);
 
   const [userLocation, setUserLocation] = useState(null); // State to store user's current location
-  const { minValue, maxValue, cuisineSelected } = route.params;
+  const { minValue, maxValue, cuisineSelected, long, lat } = route.params;
+  const toast = useToast();
 
   const handleHomePress = () => {
     navigation.navigate("HomeScreen");
@@ -31,35 +33,14 @@ const HotelListScreen = ({ navigation, route }) => {
   };
 
   useEffect(() => {
-    // Function to fetch user's current location
-    const fetchUserLocation = async () => {
-      try {
-        // Request permission to access location
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          console.error("Permission to access location was denied");
-          return;
-        }
-        // Get user's current location
-        let location = await Location.getCurrentPositionAsync({});
-        setUserLocation(location.coords); // Set user's current location
-      } catch (error) {
-        console.error("Error fetching user location:", error);
-      }
-    };
-
-    // Fetch user's current location if not already available
-    if (!userLocation) {
-      fetchUserLocation();
-    }
-
-    async function getHotelList() {
+  async function getHotelList() {
       try {
         // Proceed with fetching restaurant data if user's location is available
-        if (userLocation) {
+        console.log("lat--",lat);
+        if (lat && long) {
           const term = "restaurants";
-          const latitude = userLocation.latitude;
-          const longitude = userLocation.longitude;
+          const latitude = lat;
+          const longitude = long;
           const limit = 20;
           const sort_by = "best_match";
           const headers = {
@@ -105,6 +86,16 @@ const HotelListScreen = ({ navigation, route }) => {
               setLoading(false);
             });
         }
+        else {
+          // Display toast message if latitude or longitude is not provided
+          toast.show("Please enable location services to find restaurants near you",{
+            type: 'normal',
+            placement: "bottom",
+            duration: 4000,
+           // offset: 30,
+            animationType: "slide-in",
+          });
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
         setLoading(false);
@@ -120,7 +111,7 @@ const HotelListScreen = ({ navigation, route }) => {
 
     getHotelList();// Fetch restaurant data
     loadFonts(); 
-  }, [userLocation, minValue, maxValue, cuisineSelected]);
+  }, [lat, long, minValue, maxValue, cuisineSelected]);
 
   const handleSelectRestaurant = (restaurantId) => {
     setSelectedRestaurant(restaurantId);
