@@ -99,17 +99,18 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleHotelListPress = () => {
-    const minValue = values[0]; // Assign values here
-    const maxValue = values[1];
-    const cuisineSelected = selectedFood.toLowerCase();
-    console.log("Food type:", cuisineSelected);
+    // const minValue = values[0]; // Assign values here
+    // const maxValue = values[1];
+    // const cuisineSelected = selectedFood.toLowerCase();
+
     navigation.navigate("HotelListScreen", {
       minValue: values[0],
       maxValue: values[1],
       cuisineSelected: selectedFood.toLowerCase(),
     });
-    console.log("minValue:", minValue);
-    console.log("maxValue:", maxValue);
+    // console.log("Food type:", cuisineSelected);
+    // console.log("minValue:", minValue);
+    // console.log("maxValue:", maxValue);
   };
 
   const SeparatorComponent = () => <View style={styles.separator} />;

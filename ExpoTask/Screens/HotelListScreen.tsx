@@ -118,8 +118,8 @@ const HotelListScreen = ({ navigation, route }) => {
       setFontLoaded(true);
     }
 
-    getHotelList();
-    loadFonts(); // Fetch restaurant data
+    getHotelList();// Fetch restaurant data
+    loadFonts(); 
   }, [userLocation, minValue, maxValue, cuisineSelected]);
 
   const handleSelectRestaurant = (restaurantId) => {
@@ -261,8 +261,8 @@ const HotelListScreen = ({ navigation, route }) => {
       <View style={styles.second_row}>
         <FlatList
           data={restaurants}
-          renderItem={renderItem} // Step 2: Pass renderItem as renderItem prop
-          keyExtractor={(item) => item.id} // Step 5: Specify unique key extractor
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
         />
       </View>
     </View>
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   },
   webIcon: {
     width: 25,
-    height: 29,
+    height: 25,
   },
 });
 
