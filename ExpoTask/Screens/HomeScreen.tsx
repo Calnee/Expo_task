@@ -18,6 +18,8 @@ import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import { useEffect, useState } from "react";
 import Geolocation from "@react-native-community/geolocation";
 import { PermissionsAndroid, Platform } from "react-native";
+import { ToastProvider, useToast } from 'react-native-toast-notifications'
+
 //foodType data
 export const feeds = [
   {
@@ -72,10 +74,11 @@ export const feeds = [
 //Budget component data
 export const budget = {
   id: "1",
-  amount: 114,
+  amount: 120,
 };
-
+ var amount = budget.amount;
 const HomeScreen = ({ navigation }) => {
+  const toast = useToast();
   const [values, setValues] = useState([0, budget.amount]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredFoodTypes, setFilteredFoodTypes] = useState(feeds);
@@ -83,14 +86,13 @@ const HomeScreen = ({ navigation }) => {
   const [selectedFood, setSelectedFood] = useState(defaultSelectedFoodType);
 
   const [inputChanged, setInputChanged] = useState(false);
-
   //geolocation
   const [locationPermissionGranted, setLocationPermissionGranted] =
     useState(false);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [latitude, setLatitude] = useState(null); // State for latitude
   const [longitude, setLongitude] = useState(null); // State for longitude
-
+  
   useEffect(() => {
     requestLocationPermission();
   }, []);
@@ -161,14 +163,28 @@ const HomeScreen = ({ navigation }) => {
     setSelectedFood(selectedFood);
   };
 
+ // console.log(toast);
+
   const handleHotelListPress = () => {
-    navigation.navigate("HotelListScreen", {
-      minValue: values[0],
-      maxValue: values[1],
-      cuisineSelected: selectedFood.toLowerCase(),
-      lat: latitude,
-      long: longitude,
-    });
+    if (!locationPermissionGranted) {
+      toast.show("Please enable location services to find restaurants near you",{
+        type: 'normal',
+        placement: "bottom",
+        duration: 4000,
+       // offset: 30,
+        animationType: "slide-in",
+      });
+      console.log("Location permission not granted.");
+    } else {
+      // Handle case when location permission is granted
+      navigation.navigate("HotelListScreen", {
+        minValue: values[0],
+        maxValue: values[1],
+        cuisineSelected: selectedFood,
+        lat: latitude,
+        long: longitude,
+      });
+    }
   };
 
   const SeparatorComponent = () => <View style={styles.separator} />;
@@ -177,6 +193,7 @@ const HomeScreen = ({ navigation }) => {
   const ITEM_WIDTH = windowWidth * ITEM_WIDTH_PERCENTAGE;
 
   return (
+ 
     <ScrollView>
       <View style={styles.parent}>
         <View style={styles.iconContainer}>
@@ -222,7 +239,7 @@ const HomeScreen = ({ navigation }) => {
         />
 
         <Text style={styles.budgetText}>How much to spend?</Text>
-        <Text style={styles.subText}>${budget.amount} left</Text>
+        <Text style={styles.subText}>{`${amount} left`}</Text>
 
         {/* BudgetComponent */}
         <TouchableOpacity>

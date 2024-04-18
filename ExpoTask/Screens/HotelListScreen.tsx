@@ -15,7 +15,8 @@ import { Border, Color, FontFamily } from "../GlobalStyles";
 import * as Font from "expo-font";
 import MarqueeText from "react-native-marquee";
 import * as Location from "expo-location";
-import { useToast } from "react-native-toast-notifications";
+import { ToastProvider, useToast } from "react-native-toast-notifications";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const HotelListScreen = ({ navigation, route }) => {
   const [fontLoaded, setFontLoaded] = useState(false);
@@ -25,7 +26,7 @@ const HotelListScreen = ({ navigation, route }) => {
 
   const [userLocation, setUserLocation] = useState(null); // State to store user's current location
   const { minValue, maxValue, cuisineSelected, long, lat } = route.params;
-  const toast = useToast();
+  // const toast = useToast();
 
   const handleHomePress = () => {
     navigation.navigate("HomeScreen");
@@ -33,10 +34,10 @@ const HotelListScreen = ({ navigation, route }) => {
   };
 
   useEffect(() => {
-  async function getHotelList() {
+    async function getHotelList() {
       try {
         // Proceed with fetching restaurant data if user's location is available
-        console.log("lat--",lat);
+        console.log("lat--", lat);
         if (lat && long) {
           const term = "restaurants";
           const latitude = lat;
@@ -85,16 +86,9 @@ const HotelListScreen = ({ navigation, route }) => {
               setRestaurants(restaurantData);
               setLoading(false);
             });
-        }
-        else {
+        } else {
           // Display toast message if latitude or longitude is not provided
-          toast.show("Please enable location services to find restaurants near you",{
-            type: 'normal',
-            placement: "bottom",
-            duration: 4000,
-           // offset: 30,
-            animationType: "slide-in",
-          });
+          console.log("Location permission not granted");
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -109,13 +103,13 @@ const HotelListScreen = ({ navigation, route }) => {
       setFontLoaded(true);
     }
 
-    getHotelList();// Fetch restaurant data
-    loadFonts(); 
+    getHotelList(); // Fetch restaurant data
+    loadFonts();
   }, [lat, long, minValue, maxValue, cuisineSelected]);
 
-  const handleSelectRestaurant = (restaurantId) => {
-    setSelectedRestaurant(restaurantId);
-  };
+  // const handleSelectRestaurant = (restaurantId) => {
+  //   setSelectedRestaurant(restaurantId);
+  // };
 
   if (!fontLoaded) {
     return null;
@@ -164,6 +158,13 @@ const HotelListScreen = ({ navigation, route }) => {
         Linking.openURL(menuUrl);
       }
     };
+
+    const truncateContactName = (name: string) => {
+      if (name.length > 15) {
+        return name.substring(0, 15) + "...";
+      }
+      return name;
+    };
     // console.log(menuUrl);
     //console.log(typeof price);
     const [symbol, label] = getPriceLabel(price);
@@ -184,49 +185,43 @@ const HotelListScreen = ({ navigation, route }) => {
           />
         </View>
         <View style={styles.text_container_main}>
-          {/* {restaurantName.length > 15 ? (
-            <MarqueeText
-              style={styles.restaurantName}
-              speed={1}
-              marqueeOnStart={true}
-              loop={true}
-              delay={1000}
-            >
-              {restaurantName}
-            </MarqueeText>
-          ) : (
-            <Text style={styles.restaurantName}>{restaurantName}</Text>
-          )} */}
-
-          <MarqueeText
-            style={styles.restaurantName}
-            speed={1}
-            marqueeOnStart={true}
-            loop={true}
-            delay={1000}
-          >
-            {restaurantName.length > 24
-              ? `${restaurantName}    ${restaurantName}`
-              : restaurantName}
-          </MarqueeText>
-          <Text style={styles.address_font}>{address}</Text>
-          <Text style={styles.price}>
-            {" "}
-            {symbol} {label}
+          <Text style={styles.restaurantName}>
+            {truncateContactName(restaurantName)}
           </Text>
+          <Text style={styles.address_font}>{address}</Text>
+          <Text style={styles.price}> {symbol}</Text>
         </View>
         {menuUrl && (
-          <TouchableOpacity
-            onPress={handleWebIconPress}
-            style={styles.webContainer}
-          >
-            <View>
+          <>
+            <TouchableOpacity
+              onPress={handleWebIconPress}
+              style={styles.webContainer}
+            >
+              <View>
+                <Image
+                  source={require("../assets/images/KnifenFork.png")}
+                  style={styles.webIcon}
+                  resizeMode="contain"
+                />
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.rightArrow}>
               <Image
-                source={require("../assets/images/website.png")}
+                source={require("../assets/images/rightArrow.png")}
                 style={styles.webIcon}
                 resizeMode="contain"
               />
-            </View>
+            </TouchableOpacity>
+          </>
+        )}
+        {!menuUrl && (
+          <TouchableOpacity style={styles.noMenuUrl}>
+            <Image
+              source={require("../assets/images/rightArrow.png")}
+              style={styles.webIcon} // or specify a different style
+              resizeMode="contain"
+            />
           </TouchableOpacity>
         )}
       </TouchableOpacity>
@@ -234,7 +229,7 @@ const HotelListScreen = ({ navigation, route }) => {
   };
 
   return (
-    // <SafeAreaView>
+    <SafeAreaView style={{ flex: 1 }}>
     <View style={styles.main_container}>
       <View style={styles.first_row}>
         <View>
@@ -257,6 +252,7 @@ const HotelListScreen = ({ navigation, route }) => {
         />
       </View>
     </View>
+     </SafeAreaView>
   );
 };
 
@@ -264,6 +260,7 @@ const styles = StyleSheet.create({
   main_container: {
     flex: 1,
     backgroundColor: Color.bGNavy900,
+    position: "absolute",
   },
   first_row: {
     flexDirection: "row",
@@ -299,7 +296,7 @@ const styles = StyleSheet.create({
   main_heading: {
     color: Color.wHITE,
     fontSize: 32,
-    marginLeft: 180,
+    marginLeft: 160,
     fontFamily: FontFamily.podkovaSemiBold,
     marginBottom: 10,
   },
@@ -320,7 +317,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   text_container_main: {
-    width: "60%",
+    width: "50%",
     height: 50,
     paddingLeft: 0,
     marginLeft: 0,
@@ -353,11 +350,30 @@ const styles = StyleSheet.create({
   },
   webContainer: {
     justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
     marginLeft: 10,
+    backgroundColor: Color.blueGreen,
+    borderWidth: Border.br_12xs_5,
+    borderRadius: 50,
+    height: 35,
+    width: 35,
+    right: 20,
   },
   webIcon: {
-    width: 25,
-    height: 25,
+    width: 20,
+    height: 20,
+  },
+  rightArrow: {
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    position: "relative",
+    right: -15,
+  },
+  noMenuUrl: {
+    right: -60,
+    justifyContent: "center",
   },
 });
 

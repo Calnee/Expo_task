@@ -6,6 +6,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { HomeStackNavigation } from "./navigation/AppNavigation";
+import { ToastProvider } from 'react-native-toast-notifications'
 
 const Stack = createStackNavigator();
 
@@ -36,9 +37,11 @@ const app = () => {
   }
 
   return (
+    <ToastProvider>
     <NavigationContainer>
       <HomeStackNavigation />
     </NavigationContainer>
+     </ToastProvider>
   );
 };
 
