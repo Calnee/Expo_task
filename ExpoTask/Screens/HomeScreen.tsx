@@ -21,56 +21,56 @@ import { PermissionsAndroid, Platform } from "react-native";
 import { ToastProvider, useToast } from 'react-native-toast-notifications'
 
 //foodType data
-export const feeds = [
-  {
-    id: "1",
-    foodType: "FASTFOOD",
-  },
-  {
-    id: "2",
-    foodType: "Sandwiches",
-  },
-  {
-    id: "3",
-    foodType: "Noodles",
-  },
-  {
-    id: "4",
-    foodType: "BURGER",
-  },
-  {
-    id: "5",
-    foodType: "Breakfast & Brunch",
-  },
-  {
-    id: "6",
-    foodType: "ITALIAN",
-  },
-  {
-    id: "7",
-    foodType: "THAI",
-  },
-  {
-    id: "8",
-    foodType: "CHINESE",
-  },
-  {
-    id: "9",
-    foodType: "Desserts",
-  },
-  {
-    id: "10",
-    foodType: "PIZZA",
-  },
-  {
-    id: "11",
-    foodType: "Ramen",
-  },
-  {
-    id: "12",
-    foodType: "Mediterranean",
-  },
-];
+// export const feeds = [
+//   {
+//     id: "1",
+//     foodType: "FASTFOOD",
+//   },
+//   {
+//     id: "2",
+//     foodType: "Steakhouses",
+//   },
+//   {
+//     id: "3",
+//     foodType: "Noodles",
+//   },
+//   {
+//     id: "4",
+//     foodType: "BURGER",
+//   },
+//   {
+//     id: "5",
+//     foodType: "Bubble Tea",
+//   },
+//   {
+//     id: "6",
+//     foodType: "ITALIAN",
+//   },
+//   {
+//     id: "7",
+//     foodType: "THAI",
+//   },
+//   {
+//     id: "8",
+//     foodType: "CHINESE",
+//   },
+//   {
+//     id: "9",
+//     foodType: "Desserts",
+//   },
+//   {
+//     id: "10",
+//     foodType: "PIZZA",
+//   },
+//   {
+//     id: "11",
+//     foodType: "Ramen",
+//   },
+//   {
+//     id: "12",
+//     foodType: "Mediterranean",
+//   },
+// ];
 //Budget component data
 export const budget = {
   id: "1",
@@ -81,20 +81,19 @@ const HomeScreen = ({ navigation }) => {
   const toast = useToast();
   const [values, setValues] = useState([0, budget.amount]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredFoodTypes, setFilteredFoodTypes] = useState(feeds);
+  const [filteredFoodTypes, setFilteredFoodTypes] = useState([]);
   const defaultSelectedFoodType = "FASTFOOD";
   const [selectedFood, setSelectedFood] = useState(defaultSelectedFoodType);
-
   const [inputChanged, setInputChanged] = useState(false);
   //geolocation
-  const [locationPermissionGranted, setLocationPermissionGranted] =
-    useState(false);
+  const [locationPermissionGranted, setLocationPermissionGranted] = useState(false);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [latitude, setLatitude] = useState(null); // State for latitude
   const [longitude, setLongitude] = useState(null); // State for longitude
   
   useEffect(() => {
     requestLocationPermission();
+    fetchCategories();
   }, []);
 
   const requestLocationPermission = async () => {
@@ -147,10 +146,35 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [locationPermissionGranted]);
 
+  //fetch the categories data
+  const fetchCategories = async () => {
+    try {
+        const response = await fetch('https://api.yelp.com/v3/categories', {
+            headers: {
+                'Authorization': 'Bearer o7Hy7vuQYgzCO6VxjqImrn6A3XiCw7HfSv9KbofZBv2BzIJsNV1wp-l-OXpoibDkbyjPpq2pRx6L7NWdZG3eXWtzkC2i2ZgSrFGXCkO2bElErwdZ_1vikzLZav4XZnYx'
+            }
+        });
+        const data = await response.json();
+        const categories = data.categories;
+        const parentAlias = 'food';
+        const restaurantCategories = filterCategoriesByParentAlias(categories, parentAlias);
+        const formattedCategories = restaurantCategories.map(category => ({
+            title: category.title,
+            alias: category.alias
+        }));
+        console.log("categories:", formattedCategories);
+        return formattedCategories;
+    } catch (error) {
+        console.error("Error fetching categories:", error);
+        return []; // Return an empty array or handle the error accordingly
+    }
+};
+
+
   const handleSearch = (query) => {
     setSearchQuery(query);
-    const filtered = feeds.filter((item) =>
-      item.foodType.toLowerCase().includes(query.toLowerCase())
+    const filtered = alias.filter((item) =>
+      item.alias.toLowerCase().includes(query.toLowerCase())
     );
     setFilteredFoodTypes(filtered);
   };
@@ -163,8 +187,8 @@ const HomeScreen = ({ navigation }) => {
     setSelectedFood(selectedFood);
   };
 
- // console.log(toast);
-
+ 
+//To pass the values to next page
   const handleHotelListPress = () => {
     if (!locationPermissionGranted) {
       toast.show("Please enable location services to find restaurants near you",{
@@ -180,7 +204,7 @@ const HomeScreen = ({ navigation }) => {
       navigation.navigate("HotelListScreen", {
         minValue: values[0],
         maxValue: values[1],
-        cuisineSelected: selectedFood,
+        cuisineSelected: selectedFood.toLocaleLowerCase(),
         lat: latitude,
         long: longitude,
       });
