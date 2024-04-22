@@ -18,73 +18,72 @@ import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import { useEffect, useState } from "react";
 import Geolocation from "@react-native-community/geolocation";
 import { PermissionsAndroid, Platform } from "react-native";
-import { ToastProvider, useToast } from 'react-native-toast-notifications'
+import { ToastProvider, useToast } from "react-native-toast-notifications";
 
 //foodType data
-export const feeds = [
-  {
-    id: "1",
-    foodType: "FASTFOOD",
-  },
-  {
-    id: "2",
-    foodType: "Sandwiches",
-  },
-  {
-    id: "3",
-    foodType: "Noodles",
-  },
-  {
-    id: "4",
-    foodType: "BURGER",
-  },
-  {
-    id: "5",
-    foodType: "Breakfast & Brunch",
-  },
-  {
-    id: "6",
-    foodType: "ITALIAN",
-  },
-  {
-    id: "7",
-    foodType: "THAI",
-  },
-  {
-    id: "8",
-    foodType: "CHINESE",
-  },
-  {
-    id: "9",
-    foodType: "Desserts",
-  },
-  {
-    id: "10",
-    foodType: "PIZZA",
-  },
-  {
-    id: "11",
-    foodType: "Ramen",
-  },
-  {
-    id: "12",
-    foodType: "Mediterranean",
-  },
-];
+// export const feeds = [
+//   {
+//     id: "1",
+//     foodType: "FASTFOOD",
+//   },
+//   {
+//     id: "2",
+//     foodType: "Steakhouses",
+//   },
+//   {
+//     id: "3",
+//     foodType: "Noodles",
+//   },
+//   {
+//     id: "4",
+//     foodType: "BURGER",
+//   },
+//   {
+//     id: "5",
+//     foodType: "Bubble Tea",
+//   },
+//   {
+//     id: "6",
+//     foodType: "ITALIAN",
+//   },
+//   {
+//     id: "7",
+//     foodType: "THAI",
+//   },
+//   {
+//     id: "8",
+//     foodType: "CHINESE",
+//   },
+//   {
+//     id: "9",
+//     foodType: "Desserts",
+//   },
+//   {
+//     id: "10",
+//     foodType: "PIZZA",
+//   },
+//   {
+//     id: "11",
+//     foodType: "Ramen",
+//   },
+//   {
+//     id: "12",
+//     foodType: "Mediterranean",
+//   },
+// ];
 //Budget component data
 export const budget = {
   id: "1",
-  amount: 120,
+  amount: 1,
 };
- var amount = budget.amount;
+//var amount = budget.amount;
 const HomeScreen = ({ navigation }) => {
   const toast = useToast();
   const [values, setValues] = useState([0, budget.amount]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredFoodTypes, setFilteredFoodTypes] = useState(feeds);
+  const [filteredFoodTypes, setFilteredFoodTypes] = useState([]);
   const defaultSelectedFoodType = "FASTFOOD";
   const [selectedFood, setSelectedFood] = useState(defaultSelectedFoodType);
-
   const [inputChanged, setInputChanged] = useState(false);
   //geolocation
   const [locationPermissionGranted, setLocationPermissionGranted] =
@@ -92,9 +91,12 @@ const HomeScreen = ({ navigation }) => {
   const [currentLocation, setCurrentLocation] = useState(null);
   const [latitude, setLatitude] = useState(null); // State for latitude
   const [longitude, setLongitude] = useState(null); // State for longitude
-  
+  const [formattedCategories, setFormattedCategories] = useState([]);
+  const [selectedFoodAlias, setSelectedFoodAlias] = useState("");
+
   useEffect(() => {
     requestLocationPermission();
+    fetchCategories();
   }, []);
 
   const requestLocationPermission = async () => {
@@ -147,10 +149,44 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [locationPermissionGranted]);
 
+  //fetch the categories data
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch("https://api.yelp.com/v3/categories", {
+        headers: {
+          Authorization:
+            "Bearer o7Hy7vuQYgzCO6VxjqImrn6A3XiCw7HfSv9KbofZBv2BzIJsNV1wp-l-OXpoibDkbyjPpq2pRx6L7NWdZG3eXWtzkC2i2ZgSrFGXCkO2bElErwdZ_1vikzLZav4XZnYx",
+        },
+      });
+      const data = await response.json();
+      const categories = data.categories;
+      const parentAlias = "restaurants";
+      const restaurantCategories = filterCategoriesByParentAlias(
+        categories,
+        parentAlias
+      );
+      const formattedCategories = restaurantCategories.map((category) => ({
+        title: category.title,
+        alias: category.alias,
+      }));
+      console.log("categories:", formattedCategories);
+      setFormattedCategories(formattedCategories);
+      return formattedCategories;
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      return []; // Return an empty array or handle the error accordingly
+    }
+  };
+  const filterCategoriesByParentAlias = (categories, parentAlias) => {
+    return categories.filter((category) =>
+      category.parent_aliases.includes(parentAlias)
+    );
+  };
+
   const handleSearch = (query) => {
     setSearchQuery(query);
-    const filtered = feeds.filter((item) =>
-      item.foodType.toLowerCase().includes(query.toLowerCase())
+    const filtered = formattedCategories.filter((item) =>
+      item.alias.toLowerCase().includes(query.toLowerCase())
     );
     setFilteredFoodTypes(filtered);
   };
@@ -159,31 +195,39 @@ const HomeScreen = ({ navigation }) => {
     setValues(values);
   };
 
-  const handleFoodTypePress = (selectedFood) => {
-    setSelectedFood(selectedFood);
+  const handleFoodTypePress = (title, alias) => {
+    setSelectedFood(title);
+    setSelectedFoodAlias(alias);
   };
 
- // console.log(toast);
-
+  //To pass the values to next page
   const handleHotelListPress = () => {
     if (!locationPermissionGranted) {
-      toast.show("Please enable location services to find restaurants near you",{
-        type: 'normal',
-        placement: "bottom",
-        duration: 4000,
-       // offset: 30,
-        animationType: "slide-in",
-      });
+      toast.show(
+        "Please enable location services to find restaurants near you",
+        {
+          type: "normal",
+          placement: "bottom",
+          duration: 4000,
+          // offset: 30,
+          animationType: "slide-in",
+        }
+      );
       console.log("Location permission not granted.");
     } else {
       // Handle case when location permission is granted
-      navigation.navigate("HotelListScreen", {
-        minValue: values[0],
-        maxValue: values[1],
-        cuisineSelected: selectedFood,
-        lat: latitude,
-        long: longitude,
-      });
+      if (selectedFoodAlias) {
+        console.log("Selected cuisine:", selectedFoodAlias);
+        navigation.navigate("HotelListScreen", {
+          minValue: values[0],
+          maxValue: values[1],
+          cuisineSelected: selectedFoodAlias,
+          lat: latitude,
+          long: longitude,
+        });
+      } else {
+        console.log("Please select a cuisine.");
+      }
     }
   };
 
@@ -193,7 +237,6 @@ const HomeScreen = ({ navigation }) => {
   const ITEM_WIDTH = windowWidth * ITEM_WIDTH_PERCENTAGE;
 
   return (
- 
     <ScrollView>
       <View style={styles.parent}>
         <View style={styles.iconContainer}>
@@ -218,31 +261,31 @@ const HomeScreen = ({ navigation }) => {
         <FlatList
           horizontal={true}
           showsHorizontalScrollIndicator={false}
-          data={filteredFoodTypes}
+          data={formattedCategories}
           renderItem={({ item }) => (
             <FoodType
-              foodType={item.foodType}
-              defaultSelected={defaultSelectedFoodType === item.foodType}
-              onPress={handleFoodTypePress}
+              foodType={item.title}
+              defaultSelected={defaultSelectedFoodType === item.title}
+              onPress={() => handleFoodTypePress(item.title, item.alias)}
             />
           )}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.title}
           ItemSeparatorComponent={SeparatorComponent}
           contentContainerStyle={[
             styles.listContainer,
-            filteredFoodTypes.length <= 2
+            formattedCategories.length <= 2
               ? { width: Dimensions.get("window").width }
-              : { width: ITEM_WIDTH * filteredFoodTypes.length },
+              : { width: ITEM_WIDTH * formattedCategories.length },
             // styles.listContainer,
             // { width: filteredFoodTypes.length * 100 }
           ]}
         />
 
         <Text style={styles.budgetText}>How much to spend?</Text>
-        <Text style={styles.subText}>{`${amount} left`}</Text>
+        <Text style={styles.subText}>{`${budget.amount} left`}</Text>
 
         {/* BudgetComponent */}
-        <TouchableOpacity>
+        {values[1] > 0 && (<TouchableOpacity>
           <View style={styles.budgetWrapper}>
             <Text style={styles.amountText}>
               ${values[0]} - ${values[1]}
@@ -275,7 +318,7 @@ const HomeScreen = ({ navigation }) => {
               />
             </View>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity>)}
         <View style={styles.buttonContainer}>
           <SelectButton text="SEARCH" onPress={handleHotelListPress} />
           <DeSelectButton text="CANCEL" onPress={undefined} />
