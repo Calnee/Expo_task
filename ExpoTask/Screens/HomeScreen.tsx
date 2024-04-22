@@ -74,9 +74,9 @@ import { ToastProvider, useToast } from "react-native-toast-notifications";
 //Budget component data
 export const budget = {
   id: "1",
-  amount: 120,
+  amount: 1,
 };
-var amount = budget.amount;
+//var amount = budget.amount;
 const HomeScreen = ({ navigation }) => {
   const toast = useToast();
   const [values, setValues] = useState([0, budget.amount]);
@@ -282,10 +282,10 @@ const HomeScreen = ({ navigation }) => {
         />
 
         <Text style={styles.budgetText}>How much to spend?</Text>
-        <Text style={styles.subText}>{`${amount} left`}</Text>
+        <Text style={styles.subText}>{`${budget.amount} left`}</Text>
 
         {/* BudgetComponent */}
-        <TouchableOpacity>
+        {values[1] > 0 && (<TouchableOpacity>
           <View style={styles.budgetWrapper}>
             <Text style={styles.amountText}>
               ${values[0]} - ${values[1]}
@@ -318,7 +318,7 @@ const HomeScreen = ({ navigation }) => {
               />
             </View>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity>)}
         <View style={styles.buttonContainer}>
           <SelectButton text="SEARCH" onPress={handleHotelListPress} />
           <DeSelectButton text="CANCEL" onPress={undefined} />
