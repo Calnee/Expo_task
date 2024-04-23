@@ -67,6 +67,8 @@ const styles = StyleSheet.create({
     color: Color.wHITE,
     alignSelf: "center",
     padding: Padding.p_3xs,
+    paddingLeft: Padding.p_base,
+    paddingRight:Padding.p_base,
     fontSize: FontSize.size_base,
     fontWeight: "600",
     //marginTop:8

@@ -9,13 +9,11 @@ import {
   FlatList,
   Animated,
   Linking,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Border, Color, FontFamily } from "../GlobalStyles";
 import * as Font from "expo-font";
-import MarqueeText from "react-native-marquee";
-import * as Location from "expo-location";
-import { ToastProvider, useToast } from "react-native-toast-notifications";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const HotelListScreen = ({ navigation, route }) => {
@@ -25,6 +23,7 @@ const HotelListScreen = ({ navigation, route }) => {
   const [restaurants, setRestaurants] = useState([]);
 
   const [userLocation, setUserLocation] = useState(null); // State to store user's current location
+  const [totalResults, setTotalResults] = useState(0);
   const { minValue, maxValue, cuisineSelected, long, lat } = route.params;
   // const toast = useToast();
 
@@ -64,6 +63,7 @@ const HotelListScreen = ({ navigation, route }) => {
             priceRange = "Invalid range";
           }
 
+          console.log("price",priceRange);
           console.log("category", cuisineSelected);
           fetch(
             `https://api.yelp.com/v3/businesses/search?term=${term}&latitude=${latitude}&longitude=${longitude}&categories=${cuisineSelected}&limit=${limit}&sort_by=${sort_by}&radius=${radius}&price=${priceRange}`,
@@ -72,8 +72,17 @@ const HotelListScreen = ({ navigation, route }) => {
               headers: headers,
             }
           )
-            .then((response) => response.json())
-            .then((data) => {
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.total === 0) {
+              // Show alert if total results are 0
+              Alert.alert(
+                "No Results",
+                "No results available.",
+                [{ text: "OK", onPress: handleHomePress }],
+                { cancelable: false }
+              );
+            } else {
               //console.log(JSON.stringify(data));
               const restaurantData = data.businesses.map((business) => ({
                 id: business.id,
@@ -85,17 +94,20 @@ const HotelListScreen = ({ navigation, route }) => {
                 menuUrl: business.attributes?.menu_url || null,
               }));
               setRestaurants(restaurantData);
+              setTotalResults(data.total);
               setLoading(false);
-            });
-        } else {
-          // Display toast message if latitude or longitude is not provided
-          console.log("Location permission not granted");
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false);
+              console.log("restaurant", restaurantData);
+            }
+          });
+      } else {
+        // Display toast message if latitude or longitude is not provided
+        console.log("Location permission not granted");
       }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setLoading(false);
     }
+  }
 
     async function loadFonts() {
       await Font.loadAsync({
