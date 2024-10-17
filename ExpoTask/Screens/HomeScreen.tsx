@@ -28,11 +28,11 @@ export const feeds = [
   },
   {
     id: "2",
-    foodType: "Sandwiches",
+    foodType: "SANDWICH",
   },
   {
     id: "3",
-    foodType: "Noodles",
+    foodType: "NOODLES",
   },
   {
     id: "4",
@@ -40,7 +40,7 @@ export const feeds = [
   },
   {
     id: "5",
-    foodType: "Breakfast & Brunch",
+    foodType: "BREAKFAST & BRUNCH",
   },
   {
     id: "6",
@@ -56,7 +56,7 @@ export const feeds = [
   },
   {
     id: "9",
-    foodType: "Desserts",
+    foodType: "DESSERTS",
   },
   {
     id: "10",
@@ -64,11 +64,11 @@ export const feeds = [
   },
   {
     id: "11",
-    foodType: "Ramen",
+    foodType: "RAMEN",
   },
   {
     id: "12",
-    foodType: "Mediterranean",
+    foodType: "MEDITERRANEAN",
   },
 ];
 //Budget component data
