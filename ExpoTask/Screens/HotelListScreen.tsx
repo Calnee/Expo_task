@@ -39,11 +39,12 @@ const HotelListScreen = ({ navigation, route }) => {
         // Proceed with fetching restaurant data if user's location is available
         console.log("lat--", lat);
         if (lat && long) {
-          const term = "restaurants";
+          const term = "Food";
           const latitude = lat;
           const longitude = long;
-          const limit = 20;
+          const limit = 50;
           const sort_by = "best_match";
+          const radius = 8100;
           const headers = {
             Authorization:
               "Bearer o7Hy7vuQYgzCO6VxjqImrn6A3XiCw7HfSv9KbofZBv2BzIJsNV1wp-l-OXpoibDkbyjPpq2pRx6L7NWdZG3eXWtzkC2i2ZgSrFGXCkO2bElErwdZ_1vikzLZav4XZnYx",
@@ -65,7 +66,7 @@ const HotelListScreen = ({ navigation, route }) => {
 
           console.log("category", cuisineSelected);
           fetch(
-            `https://api.yelp.com/v3/businesses/search?term=${term}&latitude=${latitude}&longitude=${longitude}&categories=${cuisineSelected}&limit=${limit}&sort_by=${sort_by}&price=${priceRange}`,
+            `https://api.yelp.com/v3/businesses/search?term=${term}&latitude=${latitude}&longitude=${longitude}&categories=${cuisineSelected}&limit=${limit}&sort_by=${sort_by}&radius=${radius}&price=${priceRange}`,
             {
               method: "GET",
               headers: headers,
@@ -130,19 +131,7 @@ const HotelListScreen = ({ navigation, route }) => {
     }
   };
 
-  const renderItem = ({
-    item,
-  }: {
-    item: {
-      restaurantName: string;
-      imageUri: any;
-      address: string;
-      price: string;
-      menuUrl: any;
-      onPress: () => void;
-      isSelected: boolean;
-    };
-  }) => {
+  const renderItem = ({ item }) => {
     const {
       restaurantName,
       imageUri,
@@ -153,7 +142,12 @@ const HotelListScreen = ({ navigation, route }) => {
       price,
     } = item;
 
-    const handleWebIconPress = () => {
+    const handleWebIconPress = (
+      id: any,
+      latitude: any,
+      longitude: any,
+      restaurantName: any
+    ) => {
       if (menuUrl) {
         Linking.openURL(menuUrl);
       }
@@ -171,7 +165,19 @@ const HotelListScreen = ({ navigation, route }) => {
 
     return (
       <TouchableOpacity
-        onPress={onPress}
+        onPress={() => {
+          console.log(JSON.stringify(item));
+          if (item.latitude && item.longitude) {
+            handleWebIconPress(
+              item.id,
+              item.latitude,
+              item.longitude,
+              item.restaurantName
+            );
+          } else {
+            console.error("Geocode data not available for this item:", item);
+          }
+        }}
         style={[
           styles.restaurant_container,
           isSelected ? styles.selected : null,
@@ -194,16 +200,19 @@ const HotelListScreen = ({ navigation, route }) => {
         {menuUrl && (
           <>
             <TouchableOpacity
-              onPress={handleWebIconPress}
+              onPress={() => handleWebIconPress(
+                item.id,
+                item.latitude,
+                item.longitude,
+                item.restaurantName
+              )}
               style={styles.webContainer}
             >
-              <View>
-                <Image
-                  source={require("../assets/images/KnifenFork.png")}
-                  style={styles.webIcon}
-                  resizeMode="contain"
-                />
-              </View>
+              <Image
+                source={require("../assets/images/KnifenFork.png")}
+                style={styles.webIcon}
+                resizeMode="contain"
+              />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.rightArrow}>
@@ -230,29 +239,29 @@ const HotelListScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-    <View style={styles.main_container}>
-      <View style={styles.first_row}>
-        <View>
-          <TouchableOpacity onPress={handleHomePress}>
-            <Image
-              source={require("../assets/images/backArrow.png")}
-              style={styles.back_image}
-            />
-          </TouchableOpacity>
+      <View style={styles.main_container}>
+        <View style={styles.first_row}>
+          <View>
+            <TouchableOpacity onPress={handleHomePress}>
+              <Image
+                source={require("../assets/images/backArrow.png")}
+                style={styles.back_image}
+              />
+            </TouchableOpacity>
+          </View>
+          <View>
+            <Text style={styles.main_heading}>Food Finder</Text>
+          </View>
         </View>
-        <View>
-          <Text style={styles.main_heading}>Food Finder</Text>
+        <View style={styles.second_row}>
+          <FlatList
+            data={restaurants}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+          />
         </View>
       </View>
-      <View style={styles.second_row}>
-        <FlatList
-          data={restaurants}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-        />
-      </View>
-    </View>
-     </SafeAreaView>
+    </SafeAreaView>
   );
 };
 
@@ -260,7 +269,7 @@ const styles = StyleSheet.create({
   main_container: {
     flex: 1,
     backgroundColor: Color.bGNavy900,
-    position: "absolute",
+    // position: "absolute",
   },
   first_row: {
     flexDirection: "row",
@@ -368,7 +377,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     alignSelf: "center",
-    position: "relative",
+    // position: "relative",
     right: -15,
   },
   noMenuUrl: {
