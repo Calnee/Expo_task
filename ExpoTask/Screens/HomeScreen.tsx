@@ -17,7 +17,7 @@ import { FoodType } from "../components/atom/FoodType";
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import { useEffect, useState } from "react";
 import Geolocation from "@react-native-community/geolocation";
-import { PermissionsAndroid, Platform } from "react-native";
+import { Platform } from "react-native";
 import { ToastProvider, useToast } from "react-native-toast-notifications";
 
 //foodType data
@@ -74,7 +74,7 @@ export const feeds = [
 //Budget component data
 export const budget = {
   id: "1",
-  amount: 1,
+  amount: 100,
 };
 //var amount = budget.amount;
 const HomeScreen = ({ navigation }) => {
@@ -102,6 +102,7 @@ const HomeScreen = ({ navigation }) => {
   const requestLocationPermission = async () => {
     try {
       if (Platform.OS === "android") {
+        // Android-specific location permission request
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           {
@@ -114,6 +115,23 @@ const HomeScreen = ({ navigation }) => {
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
           setLocationPermissionGranted(true);
         } else {
+          setLocationPermissionGranted(false);
+        }
+      } else if (Platform.OS === "web") {
+        // Web-specific location permission request using browser's Geolocation API
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              console.log("Location granted: ", position);
+              setLocationPermissionGranted(true);
+            },
+            (error) => {
+              console.error("Error requesting location: ", error);
+              setLocationPermissionGranted(false);
+            }
+          );
+        } else {
+          console.warn("Geolocation is not available in this browser.");
           setLocationPermissionGranted(false);
         }
       } else {
