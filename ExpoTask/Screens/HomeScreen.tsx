@@ -234,7 +234,7 @@ const HomeScreen = ({ navigation }) => {
       console.log("Location permission not granted.");
     } else {
       // Handle case when location permission is granted
-      if (selectedFoodAlias) {
+      if (!selectedFoodAlias) {
         console.log("Selected cuisine:", selectedFoodAlias);
         navigation.navigate("HotelListScreen", {
           minValue: values[0],

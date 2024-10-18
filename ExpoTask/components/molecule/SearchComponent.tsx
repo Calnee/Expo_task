@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginTop: 8,
     marginBottom: 5,
-    left: 140,
+    left: 520,
   },
   closeIcon: {
     width: 25,

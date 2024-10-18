@@ -7,6 +7,8 @@ import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { HomeStackNavigation } from "./navigation/AppNavigation";
 import { ToastProvider } from 'react-native-toast-notifications'
+import { HotelListScreen } from "./Screens/HotelListScreen";
+import { SampleScreenOne } from "./Screens/SampleScreenOne";
 
 const Stack = createStackNavigator();
 
@@ -25,6 +27,17 @@ const fetchFonts = async () => {
   }
 };
 
+const linking = {
+  prefixes: ['http://localhost:8081'], // Update to your local server or production URL
+  config: {
+    screens: {
+      HomeScreen: 'HomeScreen',           // Default screen
+      HotelListScreen: 'HotelListSCreen', // Add the screens you need here
+      SampleScreenOne:'SampleScreenOne'
+    },
+  },
+};
+
 const app = () => {
   const [fontLoaded, setFontLoaded] = useState(false);
 
@@ -38,7 +51,7 @@ const app = () => {
 
   return (
     <ToastProvider>
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <HomeStackNavigation />
     </NavigationContainer>
      </ToastProvider>

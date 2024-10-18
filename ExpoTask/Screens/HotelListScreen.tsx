@@ -17,6 +17,7 @@ import MarqueeText from "react-native-marquee";
 import * as Location from "expo-location";
 import { ToastProvider, useToast } from "react-native-toast-notifications";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { SelectButton } from "../components/atom/SelectButton";
 
 const HotelListScreen = ({ navigation, route }) => {
   const [fontLoaded, setFontLoaded] = useState(false);
@@ -32,6 +33,14 @@ const HotelListScreen = ({ navigation, route }) => {
     navigation.navigate("HomeScreen");
     // navigation.navigate('Main');
   };
+  const handleNavigationOne = () => {
+    navigation.navigate('SampleScreenOne');
+  }
+
+  const handleNavigationTwo = () => {
+    navigation.navigate('SampleScreenTwo');
+  }
+
 
   useEffect(() => {
     async function getHotelList() {
@@ -153,6 +162,9 @@ const HotelListScreen = ({ navigation, route }) => {
       }
     };
 
+    
+    
+
     const truncateContactName = (name: string) => {
       if (name.length > 15) {
         return name.substring(0, 15) + "...";
@@ -249,7 +261,7 @@ const HotelListScreen = ({ navigation, route }) => {
               />
             </TouchableOpacity>
           </View>
-          <View>
+          <View style = {styles.foodFinder}>
             <Text style={styles.main_heading}>Food Finder</Text>
           </View>
         </View>
@@ -259,6 +271,8 @@ const HotelListScreen = ({ navigation, route }) => {
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
           />
+          <SelectButton text="navigate 1" onPress={handleNavigationOne}/>
+          <SelectButton text="navigate 2" onPress={handleNavigationTwo}/>
         </View>
       </View>
     </SafeAreaView>
@@ -266,6 +280,10 @@ const HotelListScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
+  foodFinder:{
+  
+
+  },
   main_container: {
     flex: 1,
     backgroundColor: Color.bGNavy900,
@@ -275,6 +293,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginTop: 10,
     paddingHorizontal: 20,
+    alignSelf:'flex-start'
+  
   },
   second_row: {
     paddingHorizontal: 20,

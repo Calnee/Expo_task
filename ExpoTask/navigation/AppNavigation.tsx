@@ -2,6 +2,8 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { HomeScreen } from "../Screens/HomeScreen";
 import { HotelListScreen } from "../Screens/HotelListScreen";
+import { SampleScreenOne } from "../Screens/SampleScreenOne";
+import { SampleScreenTwo } from "../Screens/SampleScreenTwo";
 
 const StackNav = createNativeStackNavigator();
 export function HomeStackNavigation() {
@@ -22,6 +24,23 @@ export function HomeStackNavigation() {
           headerShown: false,
         }}
       />
+
+<StackNav.Screen
+        name="SampleScreenOne"
+        component={SampleScreenOne}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+<StackNav.Screen
+        name="SampleScreenTwo"
+        component={SampleScreenTwo}
+        options={{
+          headerShown: false,
+        }}
+      />
     </StackNav.Navigator>
+    
   );
 }
