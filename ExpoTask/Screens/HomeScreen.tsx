@@ -18,7 +18,13 @@ import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import { useEffect, useState } from "react";
 import Geolocation from "@react-native-community/geolocation";
 import { Platform } from "react-native";
+
 import { ToastProvider, useToast } from "react-native-toast-notifications";
+
+let PermissionsAndroid;
+if (Platform.OS === "android") {
+  PermissionsAndroid = require("react-native").PermissionsAndroid;
+}
 
 //foodType data
 export const feeds = [
@@ -99,10 +105,56 @@ const HomeScreen = ({ navigation }) => {
     fetchCategories();
   }, []);
 
+  // const requestLocationPermission = async () => {
+  //   try {
+  //     if (Platform.OS === "android") {
+  //       // Android-specific location permission request
+  //       const granted = await PermissionsAndroid.request(
+  //         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+  //         {
+  //           title: "Location Permission",
+  //           message:
+  //             "Food Finder needs access to your location to provide recommendations.",
+  //           buttonPositive: "OK",
+  //         }
+  //       );
+  //       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+  //         setLocationPermissionGranted(true);
+  //       } else {
+  //         setLocationPermissionGranted(false);
+  //       }
+  //     } else if (Platform.OS === "web") {
+  //       // Web-specific location permission request using browser's Geolocation API
+  //       if ("geolocation" in navigator) {
+  //         navigator.geolocation.getCurrentPosition(
+  //           (position) => {
+  //             console.log("Location granted: ", position);
+  //             setLocationPermissionGranted(true);
+  //           },
+  //           (error) => {
+  //             console.error("Error requesting location: ", error);
+  //             setLocationPermissionGranted(false);
+  //           }
+  //         );
+  //       } else {
+  //         console.warn("Geolocation is not available in this browser.");
+  //         setLocationPermissionGranted(false);
+  //       }
+  //     } else {
+  //       console.warn(
+  //         "Location permission not handled for this platform:",
+  //         Platform.OS
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error("Error requesting location permission:", error);
+  //     setLocationPermissionGranted(false);
+  //   }
+  // };
+
   const requestLocationPermission = async () => {
     try {
-      if (Platform.OS === "android") {
-        // Android-specific location permission request
+      if (Platform.OS === "android" && PermissionsAndroid) {
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           {
@@ -118,12 +170,12 @@ const HomeScreen = ({ navigation }) => {
           setLocationPermissionGranted(false);
         }
       } else if (Platform.OS === "web") {
-        // Web-specific location permission request using browser's Geolocation API
         if ("geolocation" in navigator) {
           navigator.geolocation.getCurrentPosition(
             (position) => {
-              console.log("Location granted: ", position);
               setLocationPermissionGranted(true);
+              setLatitude(position.coords.latitude);
+              setLongitude(position.coords.longitude);
             },
             (error) => {
               console.error("Error requesting location: ", error);
@@ -134,11 +186,6 @@ const HomeScreen = ({ navigation }) => {
           console.warn("Geolocation is not available in this browser.");
           setLocationPermissionGranted(false);
         }
-      } else {
-        console.warn(
-          "Location permission not handled for this platform:",
-          Platform.OS
-        );
       }
     } catch (error) {
       console.error("Error requesting location permission:", error);
@@ -146,14 +193,33 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
+
+  // useEffect(() => {
+  //   // Get current position when location permission is granted
+  //   if (locationPermissionGranted) {
+  //     Geolocation.getCurrentPosition(
+  //       (position) => {
+  //         // Extract latitude and longitude from position object
+  //         const { latitude, longitude } = position.coords;
+  //         // Set current location state
+  //         setCurrentLocation({ latitude, longitude });
+  //         setLatitude(latitude);
+  //         setLongitude(longitude);
+  //         console.log("Latitude:", latitude);
+  //         console.log("Longitude:", longitude);
+  //       },
+  //       (error) => {
+  //         console.error("Error getting current position:", error);
+  //       }
+  //     );
+  //   }
+  // }, [locationPermissionGranted]);
+
   useEffect(() => {
-    // Get current position when location permission is granted
-    if (locationPermissionGranted) {
+    if (locationPermissionGranted && Platform.OS !== "web") {
       Geolocation.getCurrentPosition(
         (position) => {
-          // Extract latitude and longitude from position object
           const { latitude, longitude } = position.coords;
-          // Set current location state
           setCurrentLocation({ latitude, longitude });
           setLatitude(latitude);
           setLongitude(longitude);
@@ -459,3 +525,4 @@ const styles = StyleSheet.create({
 });
 
 export { HomeScreen };
+
